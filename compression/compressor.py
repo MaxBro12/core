@@ -25,6 +25,8 @@ class Compressor:
 
     @classmethod
     def compress_zstd_str(cls, data: str | bytes) -> bytes:
+        if type(data) is str:
+            data = data.encode()
         return zstd.compress(data)
 
     @classmethod
