@@ -1,5 +1,5 @@
 from fastapi import Request, HTTPException, status, FastAPI
-from src.redis_client import RedisClient
+from core.redis_client import RedisClient
 
 
 def client_host(request: Request) -> str:
