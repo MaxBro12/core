@@ -1,4 +1,10 @@
-from .exceptions import EnvFileNotExists, AnotherValueFound, ValueTypeException, UnsupportedTypeException
+from .exceptions import (
+    EnvFileNotExists,
+    AnotherValueFound,
+    ValueTypeException,
+    UnsupportedTypeException,
+    EmptyEnvFile
+)
 from .adt_types import TupleFloat, TupleInt
 
 
@@ -24,7 +30,10 @@ class DotEnvSettings:
         self = super().__new__(cls)
         cls.__separator = kwargs.get('separator', cls.__separator)
         cls.__encoding = kwargs.get('encoding', cls.__encoding)
-        cls.__setup_env_data(args[0] or kwargs['file_path'] or self.__file_path)
+        if len(args) > 0:
+            cls.__setup_env_data(args[0])
+        else:
+            cls.__setup_env_data(kwargs.get('file_path', self.__file_path))
         return self
 
     @classmethod
@@ -37,6 +46,8 @@ class DotEnvSettings:
                     for line in file.readlines() if not line.startswith('#') \
                     and '=' in line
                 }
+                if len(env_data) == 0:
+                    raise EmptyEnvFile(file_path)
                 for key, value in env_data.items():
                     # Проверяем, что ключи соответствуют аннотациям дочернего класса
                     # Если ключ не найден в аннотациях, вызываем исключение
@@ -44,9 +55,16 @@ class DotEnvSettings:
                         raise AnotherValueFound(key)
                     try:
                         # Привод значения к стандартным типам env
-                        if cls.__annotations__[key] in (str, int, float):
+                        # str
+                        if cls.__annotations__[key] == str:
                             setattr(cls, key, value)
-                        # Переводим bool в стандартный тип
+                        # int
+                        elif cls.__annotations__[key] == int:
+                            setattr(cls, key, int(value))
+                        # float
+                        elif cls.__annotations__[key] == float:
+                            setattr(cls, key, float(value))
+                        # bool
                         elif cls.__annotations__[key] == bool:
                             setattr(cls, key, value.lower() in ('true', 'yes', 'on', '1'))
                         # Разбиваем строку на кортеж из строк

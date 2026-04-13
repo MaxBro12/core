@@ -5,8 +5,8 @@
 ## Установка
 
 ```bash
-pip install -e ./core
-uv add ./core --editable
+pip install -e ./src
+uv add ./src --editable
 ```
 
 ## Подмодули

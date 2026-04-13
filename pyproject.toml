@@ -9,25 +9,22 @@ description = "Microservice core packages all in one"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
-    "redis>=7.1.0",
-    "sqlalchemy>=2.0.46",
-    "pydantic",
+    "redis",
+    "sqlalchemy",
     "fastapi",
-    "uvicorn>=0.40.0",
-    "httpx>=0.28.1",
-    "aiohttp>=3.13.3",
-    "psutil>=7.2.2",
+    "pydantic",
+    "uvicorn",
+    "aiohttp",
+    "psutil",
 ]
 [project.optional-dependencies]
-test = [
+tests = [
     "pytest",
     "pytest-asyncio",
     "aiosqlite",
+    "httpx",
 ]
 
 
-[tool.setuptools]
-packages = ["core"]
-
-# Исключение файлов
-exclude-package-data = {"*" = ["*.txt", "tests/*"]}
+[tool.setuptools.packages.find]
+where = ["src"]

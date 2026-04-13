@@ -1,5 +1,7 @@
-pytest
-pytest-asyncio
-pyright
-
+redis
+sqlalchemy
+fastapi
+pydantic
+uvicorn
 aiohttp
+psutil

@@ -1,9 +1,9 @@
 from time import time
 from typing import Callable
 from functools import wraps
+from dataclasses import is_dataclass, asdict
 
 from pydantic import BaseModel
-from dataclasses import is_dataclass, asdict
 from sqlalchemy.orm import DeclarativeBase
 
 

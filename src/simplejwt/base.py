@@ -6,7 +6,7 @@ import time
 from typing import Dict, Any
 from dataclasses import dataclass
 
-from .exceptions import WrongAlgorithm, InvalidToken, SimpleJWTException
+from .exceptions import WrongAlgorithm, InvalidToken
 
 
 PayloadData = Dict[str, Any]

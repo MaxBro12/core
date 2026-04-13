@@ -28,7 +28,11 @@ class Repository(ABC):
         self.model = model
         self.table = model.__tablename__
         self.relationships = relationships
-        self.except_chars = (*self.except_chars, *adt_except_chars) if adt_except_chars else self.except_chars
+        if adt_except_chars:
+            self.except_chars = (
+                *self.except_chars,
+                *adt_except_chars
+            )
 
         self.session = session
 
@@ -94,7 +98,7 @@ class Repository(ABC):
             if commit:
                 await self.session.commit()
             return True
-        except AttributeError as e:
+        except AttributeError:
             raise SessionNotFound()
 
     async def add(
@@ -114,7 +118,7 @@ class Repository(ABC):
             if commit:
                 await self.session.commit()
             return True
-        except AttributeError as e:
+        except AttributeError:
             raise SessionNotFound()
 
     async def delete(self, obj: T, commit: bool = False) -> bool:
@@ -123,9 +127,8 @@ class Repository(ABC):
             if commit:
                 await self.session.commit()
             return True
-        except AttributeError as e:
+        except AttributeError:
             raise SessionNotFound()
-            return False
 
     async def all(
         self,
@@ -147,13 +150,13 @@ class Repository(ABC):
             if commit:
                 await self.session.commit()
             return True
-        except AttributeError as e:
+        except AttributeError:
             raise SessionNotFound()
 
     async def _exists(self, _filter: str) -> bool:
         try:
             return bool(await self.session.scalar(select(exists().select_from(self.model).where(text(_filter)))))
-        except AttributeError as e:
+        except AttributeError:
             raise SessionNotFound()
 
     async def count(self) -> int:
@@ -161,7 +164,7 @@ class Repository(ABC):
             return int((await self.session.execute(
                 select(func.count()
             ).select_from(self.model))).scalar() or 0)
-        except AttributeError as e:
+        except AttributeError:
             raise SessionNotFound()
 
     async def _pagination(
@@ -181,8 +184,8 @@ class Repository(ABC):
         )
 
     @staticmethod
-    def sql_protected(func: Callable) -> Any:
-        @wraps(func)
+    def sql_protected(func_: Callable) -> Any:
+        @wraps(func_)
         async def wrap(*args, **kwargs) -> str:
             exc_chars = ('\'', '\"', ';', '(', ')', '*')
             for a in [*args, *kwargs.values()]:
@@ -190,5 +193,5 @@ class Repository(ABC):
                     for i in a:
                         if i in exc_chars:
                             raise SQLInjection(a)
-            return await func(*args, **kwargs)
+            return await func_(*args, **kwargs)
         return wrap

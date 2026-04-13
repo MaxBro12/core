@@ -4,9 +4,9 @@ from typing import Callable, Awaitable
 
 import aiohttp
 
-from core.redis_client import RedisClient
+from src.redis_client import RedisClient
 
-from .exceptions import OutOfTries, UnableToAccess, RequestMethodNotFoundException, UnableToParse
+from .exceptions import OutOfTries, RequestMethodNotFoundException, UnableToParse
 from .response import ResponseData, Method
 
 
@@ -30,7 +30,7 @@ class HttpMakerAsync:
         :param base_headers: Базовые заголовки для всех запросов.
         :param base_params: Базовые параметры для всех запросов.
         :param tries_to_reconnect: Количество попыток переподключения в случае ошибки.
-        :param timeout_in_sec: Таймаут в секундах для каждого запроса.
+        :param timeout_in_sec: Тайм-аут в секундах для каждого запроса.
         :param parse_method: Метод парсинга ответа.
         """
         self.__base_url = base_url
@@ -177,7 +177,7 @@ class HttpMakerAsync:
         logging.debug(f'{self.__class__.__name__} > make -> {self.full_path(url)}')
 
         # В стандартном HttpMaker тут работа с кэшем
-        # Для упращения кода и тк эта логика в проекте не используется она была удалена
+        # Для упрощения кода и тк эта логика в проекте не используется она была удалена
 
         return await self.__execute(
             path=url,

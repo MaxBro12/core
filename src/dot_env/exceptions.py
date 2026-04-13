@@ -10,6 +10,11 @@ class EnvFileNotExists(DotEnvException):
         super().__init__(f'Env file not found: {file_path}')
 
 
+class EmptyEnvFile(DotEnvException):
+    def __init__(self, file_path: str):
+        super().__init__(f'Env file is empty: {file_path}')
+
+
 class LoadTokenException(DotEnvException):
     def __init__(self, value_to_load: str):
         super().__init__(f'Env key missing: {value_to_load}')
