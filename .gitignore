@@ -1,11 +1,15 @@
-# Python and IDEs
+# IDE
+.idea
+.vscode
+.vs
+.env
+
+# Python
 __pycache__
 venv
-wslvenv
-.vs
-.vscode
-.idea
-.env
+.venv
+*.egg-info
+build
 
 # Pyinstall
 *.manifest
@@ -17,17 +21,42 @@ wslvenv
 *.log.*
 test
 test.*
-Loot *
 settings.toml
-./data
 cache
-dumps
 logs
+test*/misc.*
 
-# Django
-*.pot
-*.pyc
-db.sqlite3
+# DB
+*.sqlite3
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
 # NODE
 node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Utils
+*/tests/misc.py
+old
+*old
+*old.*
