@@ -11,6 +11,10 @@ uv add ./src --editable
 
 ## Подмодули
 
+### dot_env
+
+Пакет для использования переменных .env. Процесс схож с pydantic-settings, но пакет легче, а функционально поддерживаются разные списки.
+
 ### fast_decorators
 
 Пакет с декораторами для FastAPI. Сейчас реализованы следующие декораторы:
@@ -23,6 +27,12 @@ uv add ./src --editable
 Пакет с зависимостями для FastAPI. Сейчас реализованы следующие зависимости:
 
 - `PaginationParams`: параметры для пагинации
+
+### fast_middlewares
+
+Пакет с middleware для fastapi.
+
+- `blocker_check`: проверяет не находится ли пользователь в бане
 
 ### fast_routers
 
@@ -41,12 +51,6 @@ uv add ./src --editable
 
 Урезанная версия моей библиотеки [RequestsMakers](https://github.com/MaxBro12/Requests-Makers).
 Реализован только асинхронный клиент.
-
-### security
-
-Сервис хеширования паролей
-
-- `SecurityService`: сервис хеширования паролей
 
 ### simplejwt
 
