@@ -5,8 +5,8 @@ import psutil
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from src.redis_client import RedisDep
-from src.fast_decorators import cache, rate_limiter
+from core.redis_client import RedisDep
+from core.fast_decorators import cache, rate_limiter
 
 
 class StatusResponse(BaseModel):

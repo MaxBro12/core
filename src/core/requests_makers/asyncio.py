@@ -4,7 +4,7 @@ from typing import Callable, Awaitable
 
 import aiohttp
 
-from src.redis_client import RedisClient
+from core.redis_client import RedisClient
 
 from .exceptions import OutOfTries, RequestMethodNotFoundException, UnableToParse
 from .response import ResponseData, Method
