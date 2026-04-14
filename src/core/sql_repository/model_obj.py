@@ -37,6 +37,9 @@ class RepositoryObj(ABC):
         order_by_field: InstrumentedAttribute | str | None = None,
         load_relations: bool = True,
     ) -> tuple[T, ...]:
+        """
+        Метод выполняющий запрос к базе по фильтрам.
+        """
         query = select(self.model)
         if load_relations and self.relationships:
             for relationship in self.relationships:
@@ -64,6 +67,10 @@ class RepositoryObj(ABC):
         filter_: ColumnElement[bool],
         load_relations: bool = True,
     ) -> T | None:
+        """
+        Метод забирает из базы модель по фильтру,
+        если в ответе будет несколько записей, вызовется исключение GetMultiple
+        """
         objs = await self.__get_object_from_db(filter_=filter_, load_relations=load_relations)
         if len(objs) > 1:
             raise GetMultiple(self.model, len(objs))
@@ -79,6 +86,7 @@ class RepositoryObj(ABC):
         order_by_field: InstrumentedAttribute | str | None = None,
         load_relations: bool = True,
     ) -> tuple[T, ...]:
+        """Метод забирает из базы несколько моделей по фильтрам с offset и limit"""
         return await self.__get_object_from_db(
             filter_=filter_,
             offset=offset,
@@ -88,6 +96,9 @@ class RepositoryObj(ABC):
         )
 
     async def __add(self, model: DeclarativeBase, commit: bool = False) -> bool:
+        """
+        Закрытый метод, добавляет модель в базу
+        """
         try:
             self.session.add(model)
             if commit:
@@ -101,6 +112,9 @@ class RepositoryObj(ABC):
         model: DeclarativeBase,
         commit: bool = False,
     ) -> bool:
+        """
+        Метод добавления в базу готовой модели
+        """
         return await self.__add(model, commit)
 
     async def add_many(
@@ -108,6 +122,9 @@ class RepositoryObj(ABC):
         objs: AddManyObjects,
         commit: bool = False
     ) -> bool:
+        """
+        Метод добавления в базу нескольких готовых моделей
+        """
         try:
             self.session.add_all(objs)
             if commit:
@@ -117,6 +134,9 @@ class RepositoryObj(ABC):
             raise SessionNotFound()
 
     async def delete(self, obj: DeclarativeBase, commit: bool = False) -> bool:
+        """
+        Метод удаления из базы модели
+        """
         try:
             await self.session.delete(obj)
             if commit:
@@ -132,6 +152,9 @@ class RepositoryObj(ABC):
         order_by_field: InstrumentedAttribute | str | None = None,
         load_relations: bool = True,
     ) -> tuple[T, ...]:
+        """
+        Возвращает все сохраненные записи из базы
+        """
         return await self.__get_object_from_db(
             offset=skip,
             limit=limit,
@@ -140,6 +163,10 @@ class RepositoryObj(ABC):
         )
 
     async def clear_table(self, commit: bool = False) -> bool:
+        """
+        ВНИМАНИЕ!!!
+        Метот сотрет все записи из базы данных!
+        """
         try:
             await self.session.execute(delete(self.model))
             if commit:
@@ -149,16 +176,25 @@ class RepositoryObj(ABC):
             raise SessionNotFound()
 
     async def _exists(self, filter_: ColumnElement[bool]) -> bool:
+        """
+        Оптимизированный метод для поиска записи в базе
+        """
         try:
             return bool(await self.session.scalar(select(exists().select_from(self.model).where(filter_))))
         except AttributeError:
             raise SessionNotFound()
 
-    async def count(self) -> int:
+    async def count(self, filter_: ColumnElement[bool] | None = None) -> int:
+        """
+        Количество записей в базе данных
+        """
         try:
+            query = select(func.count()).select_from(self.model)
+            if filter_ is not None:
+                query.where(filter_)
             return int((await self.session.execute(
-                select(func.count()
-            ).select_from(self.model))).scalar() or 0)
+                query
+            )).scalar() or 0)
         except AttributeError:
             raise SessionNotFound()
 
@@ -170,6 +206,10 @@ class RepositoryObj(ABC):
         order_by_field: str | None = None,
         load_relations: bool = False,
     ) -> tuple[T, ...]:
+        """
+        Оптимизированный метод для пагинации.
+        Сейчас работает как some
+        """
         return await self.some(
             filter_=filter_,
             offset=skip,
