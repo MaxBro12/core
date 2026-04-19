@@ -79,4 +79,4 @@ uv add ./src --editable
 
 ## Тестирование
 
-Для тестирования не забудьте установить `requirements-dev.txt` и запустить тесты с помощью `pytest .`
+Для тестирования не забудьте установить `requirements-dev.txt` (или `uv sync --extra tests`) и запустить тесты с помощью `pytest .`

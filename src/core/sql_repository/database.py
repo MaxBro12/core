@@ -15,8 +15,14 @@ class DataBaseRepo:
     async def rollback(self):
         await self.__session.rollback()
 
+    async def begin(self):
+        await self.__session.begin()
+
     async def close(self):
         await self.__session.close()
+
+    async def add(self, obj):
+        self.__session.add(obj)
 
     @property
     def session(self) -> AsyncSession:
