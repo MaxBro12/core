@@ -17,6 +17,9 @@ class RedisClient:
             return f'{str(self.__prefix)}_{str(key)}'
         return f'{str(spec_app_prefix)}_{str(key)}'
 
+    async def delete(self, key: str | int):
+        return await self.__client.delete(self.__insert_prefix_key(key))
+
     async def set_json(self, key: str, data: dict, debug: bool = False):
         if debug:
             print(f'set_json: {key}')
