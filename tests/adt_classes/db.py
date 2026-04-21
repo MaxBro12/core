@@ -1,7 +1,7 @@
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.sql_repository import Repository, DataBaseRepo
+from src.core.sql_repository import Repository, DataBaseRepo
 
 
 class Base(DeclarativeBase):

@@ -154,7 +154,7 @@ wheels = [
 
 [[package]]
 name = "core"
-version = "0.1.0"
+version = "0.1.2b0"
 source = { editable = "." }
 dependencies = [
     { name = "aiohttp" },

@@ -6,4 +6,5 @@ class Ok(BaseModel):
 
 
 class Detail(BaseModel):
+    """Модель для детальной информации в основном об ошибке."""
     detail: str

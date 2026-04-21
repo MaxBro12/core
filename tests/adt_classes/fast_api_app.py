@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from src.fast_decorators.rate_limiter import rate_limiter
+from src.core.fast_decorators.rate_limiter import rate_limiter
 
 
 app = FastAPI()

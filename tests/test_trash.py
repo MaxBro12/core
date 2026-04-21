@@ -1,4 +1,4 @@
-from src.trash import generate_trash_string
+from src.core.trash import generate_trash_string
 
 
 def test_generate_trash_string():

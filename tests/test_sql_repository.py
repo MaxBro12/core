@@ -1,6 +1,6 @@
 import pytest
 
-from src.sql_repository import GetMultiple, SessionNotFound
+from src.core.sql_repository import GetMultiple, SessionNotFound
 
 from .adt_classes.db import SpecDataBase, SpecModel
 

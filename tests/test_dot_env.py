@@ -1,5 +1,5 @@
-from src.dot_env import DotEnvSettings, TupleInt, TupleFloat
-from src.dot_env.exceptions import EnvFileNotExists, AnotherValueFound, EmptyEnvFile
+from src.core.dot_env import DotEnvSettings, TupleInt, TupleFloat
+from src.core.dot_env.exceptions import EnvFileNotExists, AnotherValueFound, EmptyEnvFile
 
 
 def test_load():

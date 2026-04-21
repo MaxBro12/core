@@ -8,5 +8,5 @@ class WrongAlgorithm(SimpleJWTException):
 
 
 class InvalidToken(SimpleJWTException):
-    def __init__(self):
-        super().__init__('Token is invalid')
+    def __init__(self, msg: str):
+        super().__init__(f'Token is invalid: {msg}')
