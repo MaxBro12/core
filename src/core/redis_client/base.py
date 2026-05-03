@@ -6,7 +6,20 @@ import redis.asyncio as redis_a
 
 
 class RedisClient:
+    """
+    Клиент для взаимодействия с Redis.
+    Необходим для автоматического управления ключами и соединениям с RedisDep.
+    """
+
     def __init__(self, redis_pool: redis_a.ConnectionPool, prefix: str, expire: int = 3600):
+        """
+        Инициализирует экземпляр RedisClient.
+
+        Args:
+            redis_pool: Пул соединений Redis.
+            prefix: Базовый префикс, который будет добавляться ко всем ключам.
+            expire: Стандартный срок жизни ключей в секундах (по умолчанию 3600).
+        """
         self.__client = redis_a.Redis(connection_pool=redis_pool)
 
         self.__prefix = prefix

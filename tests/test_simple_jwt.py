@@ -11,6 +11,15 @@ from src.core.simplejwt import (
 jwt = SimpleJWT('test_secret')
 
 
+def test_base64_decode():
+    """Test the base64 decoding method."""
+    data = b"some_data"
+    encoded = jwt._SimpleJWT__base64_encode(data)
+    assert encoded != data
+    decoded = jwt._SimpleJWT__base64_decode(encoded)
+    assert decoded == b"some_data"
+
+
 def test_create_token_not_none():
     token = jwt.create_token({'id': 1})
     assert type(token) is str

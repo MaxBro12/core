@@ -1,11 +1,16 @@
 import pytest
+import time
 from typing import AsyncGenerator
+from unittest.mock import AsyncMock, MagicMock, patch
 
+import redis.asyncio as redis_a
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 
 from .adt_classes.db import SpecDataBase, SpecModel, Base
 from .adt_classes.fast_api_app import app
+
+from src.core.redis_client import RedisClient
 
 
 engine = create_async_engine(
@@ -54,3 +59,46 @@ async def init_db():
 async def test_client() -> AsyncGenerator[AsyncClient]:
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         yield client
+
+
+@pytest.fixture
+def mock_redis():
+    """Создает мок для Redis клиента"""
+    mock = AsyncMock(spec=redis_a.Redis)
+    mock_data = {}
+    mock_expires = {}
+
+    async def mock_get(key):
+        return mock_data.get(key)
+
+    async def mock_set(key, value, ex):
+        mock_data[key] = value
+        mock_expires[key] = time.time() + ex
+        return None
+
+    async def mock_delete(key):
+        mock_data.pop(key, None)
+        mock_expires.pop(key, None)
+        return None
+
+    # Настройка поведения по умолчанию
+    mock.get.side_effect = mock_get
+    mock.set.side_effect = mock_set
+    mock.delete.side_effect = mock_delete
+    return mock
+
+
+@pytest.fixture
+def mock_redis_pool():
+    """Создает мок для пула соединений"""
+    return MagicMock(spec=redis_a.ConnectionPool)
+
+
+@pytest.fixture
+async def redis_client(mock_redis, mock_redis_pool):
+    """Создает экземпляр RedisClient с замоканным Redis"""
+    with patch('redis.asyncio.Redis', return_value=mock_redis):
+        client = RedisClient(mock_redis_pool, "test_prefix", expire=3600)
+        # Заменяем приватный клиент на наш мок
+        client._RedisClient__client = mock_redis
+        return client
