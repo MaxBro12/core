@@ -63,7 +63,7 @@ async def test_client() -> AsyncGenerator[AsyncClient]:
 
 @pytest.fixture
 def mock_redis():
-    """Создает мок для Redis клиента"""
+    """Создает мок для Redis"""
     mock = AsyncMock(spec=redis_a.Redis)
     mock_data = {}
     mock_expires = {}
@@ -81,7 +81,6 @@ def mock_redis():
         mock_expires.pop(key, None)
         return None
 
-    # Настройка поведения по умолчанию
     mock.get.side_effect = mock_get
     mock.set.side_effect = mock_set
     mock.delete.side_effect = mock_delete
@@ -90,7 +89,7 @@ def mock_redis():
 
 @pytest.fixture
 def mock_redis_pool():
-    """Создает мок для пула соединений"""
+    """Мок пула соединений"""
     return MagicMock(spec=redis_a.ConnectionPool)
 
 
