@@ -62,8 +62,26 @@ uv add ./src --editable
 
 Новая версия [SqlAlchemyExtRepo](https://github.com/MaxBro12/SqlAlchemyExtRepo) вскоре функционал будет добавлен и в библиотеку.
 
-- `Repository`: класс для работы с моделями sqlalchemy
+- `Repository`: класс для работы с моделями sqlalchemy в формате текстовых запросов - устаревший формат, дальнеёший поддержки не будет
+- `RepositoryObj`: класс для работы с моделями sqlalchemy в формате orm
 - `DataBaseRepo`: класс для работы со всей базой данных
+
+#### Изменения в 0.2.0
+
+В этой версии будут существенные изменения в функционале объекта `RepositoryObj`. 
+
+###### Удаление метода `delete`
+
+Сейчас метод `delete` работает но вызывает предупреждение.
+
+- `RepositoryObj.delete`: метод будет удален
+- `RepositoryObj._delete`: новый метод удаления записи используя фильтр
+- `RepositoryObj._delete_obj`: новый метод удаления записи используя объект (ранее `RepositoryObj.delete`)
+
+###### Изменения в методах `add` и `add_many`
+
+- `RepositoryObj.add`: метод возвращает добавленную модель
+- `RepositoryObj.add_many`: метод возвращает список добавленных моделей
 
 ### pydantic_misc_models
 

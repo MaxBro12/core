@@ -95,7 +95,7 @@ class RepositoryObj(ABC):
             load_relations=load_relations
         )
 
-    async def __add(self, model: DeclarativeBase, commit: bool = False) -> bool:
+    async def __add(self, model: DeclarativeBase, commit: bool = False) -> DeclarativeBase:
         """
         Закрытый метод, добавляет модель в базу
         """
@@ -103,7 +103,7 @@ class RepositoryObj(ABC):
             self.session.add(model)
             if commit:
                 await self.session.commit()
-            return True
+            return model
         except AttributeError:
             raise SessionNotFound()
 
@@ -111,7 +111,7 @@ class RepositoryObj(ABC):
         self,
         model: DeclarativeBase,
         commit: bool = False,
-    ) -> bool:
+    ) -> DeclarativeBase:
         """
         Метод добавления в базу готовой модели
         """
@@ -121,7 +121,7 @@ class RepositoryObj(ABC):
         self,
         objs: AddManyObjects,
         commit: bool = False
-    ) -> bool:
+    ) -> AddManyObjects:
         """
         Метод добавления в базу нескольких готовых моделей
         """
@@ -129,13 +129,40 @@ class RepositoryObj(ABC):
             self.session.add_all(objs)
             if commit:
                 await self.session.commit()
-            return True
+            return objs
         except AttributeError:
             raise SessionNotFound()
 
     async def delete(self, obj: DeclarativeBase, commit: bool = False) -> bool:
         """
-        Метод удаления из базы модели
+        Метод будет удален в 0.2.0.
+        Метод удаления из базы модели.
+        """
+        import warnings
+        warnings.warn(f'WARNING!!! {self.__class__.__name__} > delete > METHOD WILL BE DEPRECATED use _delete or _delete_obj instead', DeprecationWarning)
+        try:
+            await self.session.delete(obj)
+            if commit:
+                await self.session.commit()
+            return True
+        except AttributeError:
+            raise SessionNotFound()
+
+    async def _delete(self, filter_: ColumnElement[bool], commit: bool = False) -> bool:
+        """
+        Метод удаления из базы модели по фильтру
+        """
+        try:
+            await self.session.delete(filter_)
+            if commit:
+                await self.session.commit()
+            return True
+        except AttributeError:
+            raise SessionNotFound()
+
+    async def _delete_obj(self, obj: DeclarativeBase, commit: bool = False) -> bool:
+        """
+        Метод удаления из базы модели по объекту
         """
         try:
             await self.session.delete(obj)
