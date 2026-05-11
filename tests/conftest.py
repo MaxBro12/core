@@ -7,7 +7,7 @@ import redis.asyncio as redis_a
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 
-from .adt_classes.db import SpecDataBase, SpecModel, Base
+from .adt_classes.db import SpecDataBase, SpecModel, Base, create_test_db
 from .adt_classes.fast_api_app import app
 
 from src.core.redis_client import RedisClient
@@ -40,19 +40,7 @@ async def init_db():
         await conn.run_sync(Base.metadata.create_all)
 
         async with test_session() as session:
-            session.add_all([
-                SpecModel(name='t1'),
-                SpecModel(name='t2'),
-                SpecModel(name='t3'),
-                SpecModel(name='t4'),
-                SpecModel(name='t5'),
-                SpecModel(name='t6'),
-                SpecModel(name='t7'),
-                SpecModel(name='t8'),
-                SpecModel(name='t9'),
-                SpecModel(name='t10')
-            ])
-            await session.commit()
+            await create_test_db(session)
 
 
 @pytest.fixture(scope='module')

@@ -1,4 +1,4 @@
-__version__ = '0.1.2b'
+__version__ = '0.1.3'
 
 from . import dot_env
 from . import fast_decorators

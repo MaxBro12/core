@@ -107,7 +107,7 @@ class RepositoryObj(ABC):
         except AttributeError:
             raise SessionNotFound()
 
-    async def add(
+    async def _add(
         self,
         model: DeclarativeBase,
         commit: bool = False,
@@ -117,7 +117,7 @@ class RepositoryObj(ABC):
         """
         return await self.__add(model, commit)
 
-    async def add_many(
+    async def _add_many(
         self,
         objs: AddManyObjects,
         commit: bool = False
@@ -153,7 +153,7 @@ class RepositoryObj(ABC):
         Метод удаления из базы модели по фильтру
         """
         try:
-            await self.session.delete(filter_)
+            await self.session.execute(delete(self.model).where(filter_))
             if commit:
                 await self.session.commit()
             return True
