@@ -95,9 +95,13 @@ class RepositoryObj(ABC):
             load_relations=load_relations
         )
 
-    async def __add(self, model: DeclarativeBase, commit: bool = False) -> DeclarativeBase:
+    async def _add(
+        self,
+        model: T,
+        commit: bool = False,
+    ) -> T:
         """
-        Закрытый метод, добавляет модель в базу
+        Метод добавления в базу готовой модели
         """
         try:
             self.session.add(model)
@@ -106,16 +110,6 @@ class RepositoryObj(ABC):
             return model
         except AttributeError:
             raise SessionNotFound()
-
-    async def _add(
-        self,
-        model: DeclarativeBase,
-        commit: bool = False,
-    ) -> DeclarativeBase:
-        """
-        Метод добавления в базу готовой модели
-        """
-        return await self.__add(model, commit)
 
     async def _add_many(
         self,
