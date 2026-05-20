@@ -59,19 +59,29 @@ def mock_redis():
     async def mock_get(key):
         return mock_data.get(key)
 
-    async def mock_set(key, value, ex):
+    async def mock_set(key: str, value: str, ex: int):
         mock_data[key] = value
         mock_expires[key] = time.time() + ex
         return None
 
-    async def mock_delete(key):
+    async def mock_delete(key: str):
         mock_data.pop(key, None)
         mock_expires.pop(key, None)
         return None
 
+    async def mock_scan_iter(key: str):
+        for k in list(mock_data.keys()):
+            if key[:-1] in k:
+                yield k
+
+    async def mock_unlink(key: str):
+        return mock_delete(key)
+
     mock.get.side_effect = mock_get
     mock.set.side_effect = mock_set
     mock.delete.side_effect = mock_delete
+    mock.unlink.side_effect = mock_unlink
+    mock.scan_iter.side_effect = mock_scan_iter
     return mock
 
 

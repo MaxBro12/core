@@ -26,16 +26,40 @@ class RedisClient:
         self.__expire = expire
 
     def __insert_prefix_key(self, key: str | int, spec_app_prefix: str | None = None) -> str:
+        """
+        Добавляет префикс приложения к ключу, если указан spec_app_prefix добавится он,
+        если нет то используется префикс сохраненный в приложение.
+        """
         if spec_app_prefix is None:
             return f'{str(self.__prefix)}_{str(key)}'
         return f'{str(spec_app_prefix)}_{str(key)}'
 
     async def delete(self, key: str | int):
+        """
+        Удаляет ключ из Redis.
+        """
         return await self.__client.delete(self.__insert_prefix_key(key))
 
+    async def clear(self, spec_app_prefix: str | None = None):
+        """
+        Удаляет все ключи приложения из Redis,
+        если указан spec_app_prefix удалятся ключи от других приложений с этим префиксом.
+        Используйте с осторожностью.
+        """
+        key = self.__insert_prefix_key(key='', spec_app_prefix=spec_app_prefix)
+        async for k in self.__client.scan_iter(f'{key}*'):
+            await self.__client.unlink(k)
+
+
     async def set_json(self, key: str, data: dict, debug: bool = False):
+        """
+        Сохраняет JSON данные в Redis.
+        - key: Ключ для сохранения данных.
+        - data: Данные для сохранения.
+        - debug: Включить отладочный режим? Выведет полный ключ сохранения.
+        """
         if debug:
-            print(f'set_json: {key}')
+            print(f'set_json: {self.__insert_prefix_key(key)}')
         try:
             await self.__client.set(
                 self.__insert_prefix_key(key),
@@ -51,8 +75,14 @@ class RedisClient:
         spec_app_prefix: str | None = None,
         debug: bool = False
     ) -> dict[str, Any] | None:
+        """
+        Получает JSON данные из Redis по ключу.
+        - key: Ключ для получения данных.
+        - spec_app_prefix: Префикс приложения для ключа если нужно использовать вне приложения.
+        - debug: Включить отладочный режим? Выведет полный ключ получения.
+        """
         if debug:
-            print(f'get_json: {key}')
+            print(f'get_json: {self.__insert_prefix_key(key, spec_app_prefix=spec_app_prefix)}')
         key = self.__insert_prefix_key(key, spec_app_prefix=spec_app_prefix)
         try:
             ans = await self.__client.get(key)
