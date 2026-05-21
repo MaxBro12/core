@@ -1,10 +1,11 @@
 from abc import ABC
 from typing import Type
+import warnings
 
 from sqlalchemy import text, select, delete, exists, func, ColumnElement
-from sqlalchemy.orm import InstrumentedAttribute, DeclarativeBase
+from sqlalchemy.orm import InstrumentedAttribute, DeclarativeBase, selectinload
+from sqlalchemy.sql.base import ExecutableOption
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 from .classes import T
 from .exeptions import SessionNotFound, GetMultiple
@@ -25,6 +26,9 @@ class RepositoryObj(ABC):
     ):
         self.model = model
         self.table = model.__tablename__
+
+        if relationships is not None:
+            warnings.warn("relationships will be removed in 0.2.0")
         self.relationships = relationships
 
         self.session = session
@@ -36,18 +40,28 @@ class RepositoryObj(ABC):
         limit: int | None = None,
         order_by_field: InstrumentedAttribute | str | None = None,
         load_relations: bool = True,
+        loader_options: tuple[ExecutableOption, ...] | None = None,
     ) -> tuple[T, ...]:
         """
         Метод выполняющий запрос к базе по фильтрам.
+        - filter_: фильтр для запроса
+        - offset: смещение от начала выборки
+        - limit: количество элементов в выборке
+        - order_by_field: поле для сортировки
+        - load_relations: загружать ли связанные объекты (будет заменено loader_options)
+        - loader_options: опции для загрузки связанных объектов
         """
         query = select(self.model)
         if load_relations and self.relationships:
+            warnings.warn(f'WARNING!!! {self.__class__.__name__} > load_relations > METHOD WILL BE DEPRECATED use loader_options instead', DeprecationWarning)
             for relationship in self.relationships:
                 if hasattr(self.model, relationship):
                     query = query.options(selectinload(getattr(self.model, relationship)))
 
         if filter_ is not None:
             query = query.filter(filter_)
+        if loader_options:
+            query = query.options(*loader_options)
         if limit:
             query = query.limit(limit)
         if offset:
@@ -66,12 +80,17 @@ class RepositoryObj(ABC):
         self,
         filter_: ColumnElement[bool],
         load_relations: bool = True,
+        loader_options: tuple[ExecutableOption, ...] | None = None,
     ) -> T | None:
         """
         Метод забирает из базы модель по фильтру,
         если в ответе будет несколько записей, вызовется исключение GetMultiple
         """
-        objs = await self.__get_object_from_db(filter_=filter_, load_relations=load_relations)
+        objs = await self.__get_object_from_db(
+            filter_=filter_,
+            load_relations=load_relations,
+            loader_options=loader_options,
+        )
         if len(objs) > 1:
             raise GetMultiple(self.model, len(objs))
         elif len(objs) == 0:
@@ -85,6 +104,7 @@ class RepositoryObj(ABC):
         limit: int | None = None,
         order_by_field: InstrumentedAttribute | str | None = None,
         load_relations: bool = True,
+        loader_options: tuple[ExecutableOption, ...] | None = None,
     ) -> tuple[T, ...]:
         """Метод забирает из базы несколько моделей по фильтрам с offset и limit"""
         return await self.__get_object_from_db(
@@ -92,7 +112,8 @@ class RepositoryObj(ABC):
             offset=offset,
             limit=limit,
             order_by_field=order_by_field,
-            load_relations=load_relations
+            load_relations=load_relations,
+            loader_options=loader_options,
         )
 
     async def _add(
@@ -132,7 +153,6 @@ class RepositoryObj(ABC):
         Метод будет удален в 0.2.0.
         Метод удаления из базы модели.
         """
-        import warnings
         warnings.warn(f'WARNING!!! {self.__class__.__name__} > delete > METHOD WILL BE DEPRECATED use _delete or _delete_obj instead', DeprecationWarning)
         try:
             await self.session.delete(obj)
@@ -172,6 +192,7 @@ class RepositoryObj(ABC):
         limit: int | None = None,
         order_by_field: InstrumentedAttribute | str | None = None,
         load_relations: bool = True,
+        loader_options: tuple[ExecutableOption, ...] | None = None,
     ) -> tuple[T, ...]:
         """
         Возвращает все сохраненные записи из базы
@@ -181,6 +202,7 @@ class RepositoryObj(ABC):
             limit=limit,
             order_by_field=order_by_field,
             load_relations=load_relations,
+            loader_options=loader_options,
         )
 
     async def clear_table(self, commit: bool = False) -> bool:
@@ -226,6 +248,7 @@ class RepositoryObj(ABC):
         limit: int | None = None,
         order_by_field: str | None = None,
         load_relations: bool = False,
+        loader_options: tuple[ExecutableOption, ...] | None = None,
     ) -> tuple[T, ...]:
         """
         Оптимизированный метод для пагинации.
@@ -237,4 +260,5 @@ class RepositoryObj(ABC):
             limit=limit,
             order_by_field=order_by_field,
             load_relations=load_relations,
+            loader_options=loader_options,
         )
