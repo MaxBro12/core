@@ -1,5 +1,6 @@
 __version__ = '0.1.4a'
 
+from . import debug
 from . import dot_env
 from . import fast_decorators
 from . import fast_depends
@@ -14,6 +15,7 @@ from . import trash
 
 
 __all__ = (
+    'debug',
     'dot_env',
     'fast_decorators',
     'fast_depends',
