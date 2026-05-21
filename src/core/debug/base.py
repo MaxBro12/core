@@ -67,10 +67,10 @@ class LoggerManager:
                     "backupCount": 3,
                     "encoding": "utf-8",
                 },
-                "dispatcher": {
-                    "class": "debug.dispatcher_handler.DispatcherHandler",
-                    "level": "ERROR",
-                },
+                # "dispatcher": {
+                #     "class": "debug.dispatcher_handler.DispatcherHandler",
+                #     "level": "ERROR",
+                # },
             },
             "loggers": {
                 # Глобальный корень приложения
