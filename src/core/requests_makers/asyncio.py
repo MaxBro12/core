@@ -10,6 +10,9 @@ from .exceptions import OutOfTries, RequestMethodNotFoundException, UnableToPars
 from .response import ResponseData, Method
 
 
+logger = logging.getLogger(__name__)
+
+
 class HttpMakerAsync:
     """
     Асинхронный HTTP-клиент с улучшенной обработкой json ответа и контролем сессии.

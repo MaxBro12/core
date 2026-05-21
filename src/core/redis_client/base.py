@@ -1,8 +1,12 @@
+import logging
 import json
 from typing import Any
 
 from redis.exceptions import ConnectionError
 import redis.asyncio as redis_a
+
+
+logger = logging.getLogger(__name__)
 
 
 class RedisClient:
@@ -34,10 +38,12 @@ class RedisClient:
             return f'{str(self.__prefix)}_{str(key)}'
         return f'{str(spec_app_prefix)}_{str(key)}'
 
-    async def delete(self, key: str | int):
+    async def delete(self, key: str | int, debug: bool = False):
         """
         Удаляет ключ из Redis.
         """
+        if debug:
+            logger.debug(f'Deleting key: {self.__insert_prefix_key(key)}')
         return await self.__client.delete(self.__insert_prefix_key(key))
 
     async def clear(self, spec_app_prefix: str | None = None):
@@ -47,6 +53,7 @@ class RedisClient:
         Используйте с осторожностью.
         """
         key = self.__insert_prefix_key(key='', spec_app_prefix=spec_app_prefix)
+        logger.debug(f'Clearing keys for: {key}')
         async for k in self.__client.scan_iter(f'{key}*'):
             await self.__client.unlink(k)
 
@@ -59,7 +66,7 @@ class RedisClient:
         - debug: Включить отладочный режим? Выведет полный ключ сохранения.
         """
         if debug:
-            print(f'set_json: {self.__insert_prefix_key(key)}')
+            logger.debug(f'set_json: {self.__insert_prefix_key(key)}')
         try:
             await self.__client.set(
                 self.__insert_prefix_key(key),
@@ -82,7 +89,9 @@ class RedisClient:
         - debug: Включить отладочный режим? Выведет полный ключ получения.
         """
         if debug:
-            print(f'get_json: {self.__insert_prefix_key(key, spec_app_prefix=spec_app_prefix)}')
+            logger.debug(
+                f'get_json: {self.__insert_prefix_key(key, spec_app_prefix=spec_app_prefix)}'
+            )
         key = self.__insert_prefix_key(key, spec_app_prefix=spec_app_prefix)
         try:
             ans = await self.__client.get(key)

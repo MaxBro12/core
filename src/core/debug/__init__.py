@@ -1,7 +1,6 @@
-from .classes import Logger
+from .base import LoggerManager
 
-logger = Logger()
 
 __all__ = (
-    'logger',
+    'LoggerManager',
 )
