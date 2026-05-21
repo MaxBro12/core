@@ -9,7 +9,7 @@ class LoggerManager:
 
     def __init__(
         self,
-        path: str,
+        path: str = './logs',
         loggers: dict | None = None,
         handlers: dict | None = None,
         formatters: dict | None = None,
