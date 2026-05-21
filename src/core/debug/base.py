@@ -62,7 +62,7 @@ class LoggerManager:
                     "class": "logging.handlers.RotatingFileHandler",
                     "level": "INFO",
                     "formatter": "standard",
-                    "filename": "app.log",
+                    "filename": "./logs/app.log",
                     "maxBytes": 10485760,
                     "backupCount": 3,
                     "encoding": "utf-8",
