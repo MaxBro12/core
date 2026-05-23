@@ -77,6 +77,7 @@ class HttpMakerAsync:
         :param spec_app_prefix: Префикс приложения.
         :return: Данные из кэша или None, если данные не найдены.
         """
+        print(f'redis_cache: {key}, spec_app_prefix={spec_app_prefix}')
         return await redis.get_json(
             key=key,
             spec_app_prefix=spec_app_prefix
@@ -188,7 +189,10 @@ class HttpMakerAsync:
         """
         logging.debug(f'{self.__class__.__name__} > make -> {self.full_path(url)}')
 
-        if not not_use_cache and redis is not None and key is not None:
+        if not not_use_cache \
+        and redis is not None \
+        and key is not None \
+        and self.__redis_prefix is not None:
             cached_data = await self.redis_cache(redis, key, self.__redis_prefix)
             if cached_data is not None:
                 raise Exception(f'Cached data found {cached_data}')
