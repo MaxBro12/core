@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from tkinter.constants import E
 from typing import Callable, Awaitable
 
 import aiohttp
@@ -24,7 +25,8 @@ class HttpMakerAsync:
         base_params: None | dict = None,
         tries_to_reconnect: int = 3,
         timeout_in_sec: int = 10,
-        parse_method: Callable[[aiohttp.ClientResponse], Awaitable[ResponseData]] | None = None
+        parse_method: Callable[[aiohttp.ClientResponse], Awaitable[ResponseData]] | None = None,
+        redis_prefix: str | None = None,
     ):
         """
         Инициализация асинхронного HTTP-клиента.
@@ -52,6 +54,7 @@ class HttpMakerAsync:
         if parse_method is None: # Если не передан метод парсинга, используем простой метод
             parse_method = self._get_simple_response
         self.__parse_method = parse_method
+        self.__redis_prefix = redis_prefix
 
     def full_path(self, path: str) -> str:
         """
@@ -164,6 +167,9 @@ class HttpMakerAsync:
         params: dict | None = None,
         headers: dict | None = None,
         try_wait_if_error: bool = True,
+        not_use_cache: bool = False,
+        redis: RedisClient | None = None,
+        key: str | None = None,
     ) -> ResponseData:
         """
         Выполняет HTTP-запрос с заданными параметрами.
@@ -175,12 +181,17 @@ class HttpMakerAsync:
         :param params: Параметры запроса.
         :param headers: Заголовки запроса.
         :param try_wait_if_error: Подождать и попробовать снова при ошибке или вернуть ошибку.
+        :param not_use_cache: Не использовать кэш.
+        :param redis: Клиент Redis для кэширования.
+        :param key: Ключ для кэширования.
         :return: Объект ResponseData с данными ответа.
         """
         logging.debug(f'{self.__class__.__name__} > make -> {self.full_path(url)}')
 
-        # В стандартном HttpMaker тут работа с кэшем
-        # Для упрощения кода и тк эта логика в проекте не используется она была удалена
+        if not not_use_cache and redis is not None and key is not None:
+            cached_data = await self.redis_cache(redis, key, self.__redis_prefix)
+            if cached_data is not None:
+                raise Exception(f'Cached data found {cached_data}')
 
         return await self.__execute(
             path=url,

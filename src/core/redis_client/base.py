@@ -66,7 +66,7 @@ class RedisClient:
         - debug: Включить отладочный режим? Выведет полный ключ сохранения.
         """
         if debug:
-            logger.debug(f'set_json: {self.__insert_prefix_key(key)}')
+            logger.debug(f'set_json: {self.__insert_prefix_key(key)} > {data}')
         try:
             await self.__client.set(
                 self.__insert_prefix_key(key),
@@ -88,13 +88,13 @@ class RedisClient:
         - spec_app_prefix: Префикс приложения для ключа если нужно использовать вне приложения.
         - debug: Включить отладочный режим? Выведет полный ключ получения.
         """
-        if debug:
-            logger.debug(
-                f'get_json: {self.__insert_prefix_key(key, spec_app_prefix=spec_app_prefix)}'
-            )
         key = self.__insert_prefix_key(key, spec_app_prefix=spec_app_prefix)
         try:
             ans = await self.__client.get(key)
+            if debug:
+                logger.debug(
+                    f'get_json: {self.__insert_prefix_key(key, spec_app_prefix=spec_app_prefix)} > {ans}'
+                )
             if ans is None:
                 return None
             return json.loads(ans)
