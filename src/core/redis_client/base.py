@@ -93,7 +93,7 @@ class RedisClient:
             ans = await self.__client.get(key)
             if debug:
                 logger.debug(
-                    f'get_json: {self.__insert_prefix_key(key, spec_app_prefix=spec_app_prefix)} > {ans}'
+                    f'get_json: {key} > {ans}'
                 )
             if ans is None:
                 return None
