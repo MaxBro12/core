@@ -17,6 +17,11 @@ class GetMultiple(RepositoryException):
         super().__init__(f'GET - {model} multiple {count} models found')
 
 
+class TryGetMultiple(RepositoryException):
+    def __init__(self, model: Type[T]):
+        super().__init__(f'TRY GET - {model} - filter_ is None in get query')
+
+
 class ItemNotFound(RepositoryException):
     def __init__(self, model: Type[T], search_field: str, search_value: str | int):
         super().__init__(f'Item not found: {model}.{search_field}={search_value}')

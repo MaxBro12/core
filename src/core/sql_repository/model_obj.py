@@ -1,14 +1,15 @@
 from abc import ABC
-from typing import Type
+from typing import Type, Any
 import warnings
 
 from sqlalchemy import text, select, delete, exists, func, ColumnElement
 from sqlalchemy.orm import InstrumentedAttribute, DeclarativeBase, selectinload
 from sqlalchemy.sql.base import ExecutableOption
+from sqlalchemy.sql._typing import _ColumnsClauseArgument
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .classes import T
-from .exeptions import SessionNotFound, GetMultiple
+from .exeptions import SessionNotFound, GetMultiple, TryGetMultiple
 
 
 AddManyObjects = tuple[T, ...] | list[T]
@@ -35,13 +36,14 @@ class RepositoryObj(ABC):
 
     async def __get_object_from_db(
         self,
+        select_columns: _ColumnsClauseArgument | None = None,
         filter_: ColumnElement[bool] | None = None,
         offset: int | None = None,
         limit: int | None = None,
         order_by_field: InstrumentedAttribute | str | None = None,
         load_relations: bool = True,
         loader_options: tuple[ExecutableOption, ...] | None = None,
-    ) -> tuple[T, ...]:
+    ) -> tuple[T | Any, ...]:
         """
         Метод выполняющий запрос к базе по фильтрам.
         - filter_: фильтр для запроса
@@ -51,7 +53,11 @@ class RepositoryObj(ABC):
         - load_relations: загружать ли связанные объекты (будет заменено loader_options)
         - loader_options: опции для загрузки связанных объектов
         """
-        query = select(self.model)
+        if select_columns is not None:
+            query = select(select_columns)
+        else:
+            query = select(self.model)
+
         if load_relations and self.relationships:
             warnings.warn(f'WARNING!!! {self.__class__.__name__} > load_relations > METHOD WILL BE DEPRECATED use loader_options instead', DeprecationWarning)
             for relationship in self.relationships:
@@ -79,6 +85,7 @@ class RepositoryObj(ABC):
     async def get(
         self,
         filter_: ColumnElement[bool],
+        select_columns: _ColumnsClauseArgument | None = None,
         load_relations: bool = True,
         loader_options: tuple[ExecutableOption, ...] | None = None,
     ) -> T | None:
@@ -86,7 +93,10 @@ class RepositoryObj(ABC):
         Метод забирает из базы модель по фильтру,
         если в ответе будет несколько записей, вызовется исключение GetMultiple
         """
+        if filter_ is None:
+            raise TryGetMultiple(self.model)
         objs = await self.__get_object_from_db(
+            select_columns=select_columns,
             filter_=filter_,
             load_relations=load_relations,
             loader_options=loader_options,
@@ -102,6 +112,7 @@ class RepositoryObj(ABC):
         filter_: ColumnElement[bool] | None = None,
         offset: int | None = None,
         limit: int | None = None,
+        select_columns: _ColumnsClauseArgument | None = None,
         order_by_field: InstrumentedAttribute | str | None = None,
         load_relations: bool = True,
         loader_options: tuple[ExecutableOption, ...] | None = None,
@@ -112,6 +123,7 @@ class RepositoryObj(ABC):
             offset=offset,
             limit=limit,
             order_by_field=order_by_field,
+            select_columns=select_columns,
             load_relations=load_relations,
             loader_options=loader_options,
         )
@@ -190,6 +202,7 @@ class RepositoryObj(ABC):
         self,
         skip: int | None = None,
         limit: int | None = None,
+        select_columns: _ColumnsClauseArgument | None = None,
         order_by_field: InstrumentedAttribute | str | None = None,
         load_relations: bool = True,
         loader_options: tuple[ExecutableOption, ...] | None = None,
@@ -201,6 +214,7 @@ class RepositoryObj(ABC):
             offset=skip,
             limit=limit,
             order_by_field=order_by_field,
+            select_columns=select_columns,
             load_relations=load_relations,
             loader_options=loader_options,
         )
@@ -246,6 +260,7 @@ class RepositoryObj(ABC):
         filter_: ColumnElement[bool] | None = None,
         skip: int | None = None,
         limit: int | None = None,
+        select_columns: _ColumnsClauseArgument | None = None,
         order_by_field: str | None = None,
         load_relations: bool = False,
         loader_options: tuple[ExecutableOption, ...] | None = None,
@@ -259,6 +274,7 @@ class RepositoryObj(ABC):
             offset=skip,
             limit=limit,
             order_by_field=order_by_field,
+            select_columns=select_columns,
             load_relations=load_relations,
             loader_options=loader_options,
         )
