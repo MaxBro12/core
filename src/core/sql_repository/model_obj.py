@@ -36,7 +36,7 @@ class RepositoryObj(ABC):
 
     async def __get_object_from_db(
         self,
-        select_columns: _ColumnsClauseArgument | None = None,
+        select_columns: tuple[_ColumnsClauseArgument[Any], ...] | None = None,
         filter_: ColumnElement[bool] | None = None,
         offset: int | None = None,
         limit: int | None = None,
@@ -46,6 +46,7 @@ class RepositoryObj(ABC):
     ) -> tuple[T | Any, ...]:
         """
         Метод выполняющий запрос к базе по фильтрам.
+        - select_columns: колонки для выборки или None для выбора модели
         - filter_: фильтр для запроса
         - offset: смещение от начала выборки
         - limit: количество элементов в выборке
@@ -54,7 +55,7 @@ class RepositoryObj(ABC):
         - loader_options: опции для загрузки связанных объектов
         """
         if select_columns is not None:
-            query = select(select_columns)
+            query = select(*select_columns)
         else:
             query = select(self.model)
 
@@ -85,7 +86,7 @@ class RepositoryObj(ABC):
     async def get(
         self,
         filter_: ColumnElement[bool],
-        select_columns: _ColumnsClauseArgument | None = None,
+        select_columns: tuple[_ColumnsClauseArgument[Any], ...] | None = None,
         load_relations: bool = True,
         loader_options: tuple[ExecutableOption, ...] | None = None,
     ) -> T | None:
@@ -112,7 +113,7 @@ class RepositoryObj(ABC):
         filter_: ColumnElement[bool] | None = None,
         offset: int | None = None,
         limit: int | None = None,
-        select_columns: _ColumnsClauseArgument | None = None,
+        select_columns: tuple[_ColumnsClauseArgument[Any], ...] | None = None,
         order_by_field: InstrumentedAttribute | str | None = None,
         load_relations: bool = True,
         loader_options: tuple[ExecutableOption, ...] | None = None,
@@ -202,7 +203,7 @@ class RepositoryObj(ABC):
         self,
         skip: int | None = None,
         limit: int | None = None,
-        select_columns: _ColumnsClauseArgument | None = None,
+        select_columns: tuple[_ColumnsClauseArgument[Any], ...] | None = None,
         order_by_field: InstrumentedAttribute | str | None = None,
         load_relations: bool = True,
         loader_options: tuple[ExecutableOption, ...] | None = None,
@@ -260,7 +261,7 @@ class RepositoryObj(ABC):
         filter_: ColumnElement[bool] | None = None,
         skip: int | None = None,
         limit: int | None = None,
-        select_columns: _ColumnsClauseArgument | None = None,
+        select_columns: tuple[_ColumnsClauseArgument[Any], ...] | None = None,
         order_by_field: str | None = None,
         load_relations: bool = False,
         loader_options: tuple[ExecutableOption, ...] | None = None,
