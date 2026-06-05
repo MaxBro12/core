@@ -96,6 +96,8 @@ uv add ./src --editable
 
 Новая версия [SqlAlchemyExtRepo](https://github.com/MaxBro12/SqlAlchemyExtRepo) вскоре функционал будет добавлен и в библиотеку.
 
+[Подробное README](https://github.com/MaxBro12/src/core/sql_repository/README.md)
+
 - `Repository`: класс для работы с моделями sqlalchemy в формате текстовых запросов - устаревший формат, дальнеёший поддержки не будет
 - `RepositoryObj`: класс для работы с моделями sqlalchemy в формате orm
 - `DataBaseRepo`: класс для работы со всей базой данных
