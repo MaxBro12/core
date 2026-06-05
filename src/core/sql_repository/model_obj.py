@@ -79,6 +79,8 @@ class RepositoryObj(ABC):
             else:
                 query = query.order_by(order_by_field)
         try:
+            if select_columns is not None:
+                return tuple((await self.session.execute(query)).all())
             return tuple((await self.session.execute(query)).scalars().all())
         except AttributeError:
             raise SessionNotFound()

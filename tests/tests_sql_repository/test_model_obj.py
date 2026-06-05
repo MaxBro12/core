@@ -99,3 +99,22 @@ async def test_clear_table(test_db: SpecDataBase):
     await test_db.commit()
     assert await test_db.test_obj.count() == 0
     await create_test_db(test_db.session)
+
+
+async def test_selection(test_db: SpecDataBase):
+    objs = await test_db.test_obj.all(select_columns=(SpecModel.name,))
+    assert objs is not None
+    assert len(objs) == 10
+    assert len(objs[0]) == 1
+    assert objs[0][0] == 't1'
+    assert objs[1][0] == 't2'
+
+
+async def test_multiple_select(test_db: SpecDataBase):
+    objs = await test_db.test_obj.all(select_columns=(SpecModel.name, SpecModel.id))
+    assert objs is not None
+    assert len(objs) == 10
+    assert objs[0][0] == 't1'
+    assert objs[0][1] == 1
+    assert objs[1][0] == 't2'
+    assert objs[1][1] == 2
