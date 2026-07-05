@@ -1,6 +1,5 @@
 import asyncio
 import logging
-from tkinter.constants import E
 from typing import Callable, Awaitable
 
 import aiohttp
