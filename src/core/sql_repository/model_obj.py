@@ -73,7 +73,7 @@ class RepositoryObj(ABC):
             query = query.limit(limit)
         if offset:
             query = query.offset(offset)
-        if order_by_field:
+        if order_by_field is not None:
             if type(order_by_field) is str:
                 query = query.order_by(text(order_by_field))
             else:
