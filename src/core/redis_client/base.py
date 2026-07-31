@@ -58,7 +58,7 @@ class RedisClient:
             await self.__client.unlink(k)
 
 
-    async def set_json(self, key: str, data: dict, debug: bool = False):
+    async def set_json(self, key: str, data: dict, expire: int | None = None, debug: bool = False):
         """
         Сохраняет JSON данные в Redis.
         - key: Ключ для сохранения данных.
@@ -71,7 +71,7 @@ class RedisClient:
             await self.__client.set(
                 self.__insert_prefix_key(key),
                 json.dumps(data),
-                ex=self.__expire
+                ex=expire if expire is not None else self.__expire
             )
         except ConnectionError:
             return None
