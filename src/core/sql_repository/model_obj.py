@@ -177,12 +177,12 @@ class RepositoryObj(ABC):
         except AttributeError:
             raise SessionNotFound()
 
-    async def _delete(self, filter_: ColumnElement[bool], commit: bool = False) -> bool:
+    async def _delete(self, filter_: ColumnElement[bool], spec_model: Type[T] | None = None, commit: bool = False) -> bool:
         """
         Метод удаления из базы модели по фильтру
         """
         try:
-            await self.session.execute(delete(self.model).where(filter_))
+            await self.session.execute(delete(spec_model or self.model).where(filter_))
             if commit:
                 await self.session.commit()
             return True
