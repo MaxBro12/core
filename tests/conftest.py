@@ -16,9 +16,9 @@ from src.core.redis_client import RedisClient
 engine = create_async_engine(
     url='sqlite+aiosqlite:///:memory:',
     pool_pre_ping=True,
-    echo=True
+    echo=True,
 )
-test_session = async_sessionmaker(bind=engine, expire_on_commit=False)
+test_session = async_sessionmaker(bind=engine, expire_on_commit=False, join_transaction_mode="create_savepoint")
 
 
 async def get_test_session() -> AsyncGenerator[AsyncSession]:
@@ -29,7 +29,9 @@ async def get_test_session() -> AsyncGenerator[AsyncSession]:
 @pytest.fixture(scope='function')
 async def test_db() -> AsyncGenerator[SpecDataBase]:
     async with test_session() as session:
-        yield SpecDataBase(session=session)
+        async with session.begin():
+            yield SpecDataBase(session=session)
+            await session.rollback()
 
 
 

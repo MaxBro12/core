@@ -3,7 +3,7 @@ class RedisException(Exception):
 
 
 class RedisConnectionError(RedisException):
-    def __init__(self, ):
+    def __init__(self):
         super().__init__('Redis connection error')
 
 

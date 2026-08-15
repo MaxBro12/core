@@ -2,6 +2,11 @@ class RequestsMakersException(Exception):
     pass
 
 
+class MicroServiceUrlUnknown(RequestsMakersException):
+    def __init__(self):
+        super().__init__(f'MicroService url unknown = ""')
+
+
 class OutOfTries(RequestsMakersException):
     def __init__(self, url: str):
         super().__init__(f'Out of tries to connect to {url}')

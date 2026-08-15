@@ -44,49 +44,45 @@ async def test_all(test_db: SpecDataBase):
 
 async def test_add(test_db: SpecDataBase):
     assert await test_db.test.add(SpecModel(name='t11')) is True
-    await test_db.commit()
+    await test_db.flush()
     data = await test_db.test.get(f'{SpecModel.__tablename__}.id=11')
     assert data is not None
     assert data.name == 't11'
 
 
 async def test_add_many(test_db: SpecDataBase):
-    assert await test_db.test.add_many([SpecModel(name='t12'), SpecModel(name='t13')]) is True
-    await test_db.commit()
-    data = await test_db.test.some(f'{SpecModel.__tablename__}.id IN (12, 13)')
+    assert await test_db.test.add_many([SpecModel(id=1001, name='tta1'), SpecModel(id=1002, name='tta2')]) is True
+    await test_db.flush()
+    data = await test_db.test.some(f'{SpecModel.__tablename__}.id IN (1001, 1002)')
     assert data is not None
     assert len(data) == 2
-    assert data[0].name == 't12'
-    assert data[1].name == 't13'
+    assert data[0].name == 'tta1'
+    assert data[1].name == 'tta2'
 
 
 async def test_delete(test_db: SpecDataBase):
-    obj = await test_db.test.get(f'{SpecModel.__tablename__}.id=13')
+    obj = await test_db.test.get(f'{SpecModel.__tablename__}.id=1')
     assert obj is not None
     assert await test_db.test.delete(obj) is True
 
 
 async def test_exists(test_db: SpecDataBase):
     assert await test_db.test._exists(f'{SpecModel.__tablename__}.id=1') is True
-    assert await test_db.test._exists(f'{SpecModel.__tablename__}.id=11') is True
-    assert await test_db.test._exists(f'{SpecModel.__tablename__}.id=12') is True
+    assert await test_db.test._exists(f'{SpecModel.__tablename__}.id=2') is True
+    assert await test_db.test._exists(f'{SpecModel.__tablename__}.id=100003') is False
 
 
 async def test_count(test_db: SpecDataBase):
-    assert await test_db.test.count() == 13
+    assert await test_db.test.count() == 10
 
 
 async def test_wrong_session():
-    a = SpecDataBase(session=None)
-    try:
+    with pytest.raises(SessionNotFound):
+        a = SpecDataBase(session=None)
         await a.test.get(f'{SpecModel.__tablename__}.id=1')
-        assert False
-    except SessionNotFound:
-        assert True
 
 
 async def test_clear_table(test_db: SpecDataBase):
     await test_db.test.clear_table()
-    await test_db.commit()
+    await test_db.flush()
     assert await test_db.test.count() == 0
-    await create_test_db(test_db.session)

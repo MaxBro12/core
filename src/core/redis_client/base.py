@@ -5,6 +5,8 @@ from typing import Any
 from redis.exceptions import ConnectionError
 import redis.asyncio as redis_a
 
+from .exceptions import RedisConnectionError
+
 
 logger = logging.getLogger(__name__)
 
@@ -13,6 +15,7 @@ class RedisClient:
     """
     Клиент для взаимодействия с Redis.
     Необходим для автоматического управления ключами и соединениям с RedisDep.
+    При создании попробует подключиться к redis, при ошибке вызовет RedisConnectionError
     """
 
     def __init__(self, redis_pool: redis_a.ConnectionPool, prefix: str, expire: int = 3600):
@@ -24,8 +27,16 @@ class RedisClient:
             prefix: Базовый префикс, который будет добавляться ко всем ключам.
             expire: Стандартный срок жизни ключей в секундах (по умолчанию 3600).
         """
+        # Создаем клиент и пытаемся подключиться, если не получиться пробрасываем исключение
         self.__client = redis_a.Redis(connection_pool=redis_pool)
+        try:
+            if self.__client.ping():
+                logger.info(f'RedisClient connected')
+        except redis_a.ConnectionError as e:
+            logger.critical(f'Redis connection error: {e}')
+            raise RedisConnectionError()
 
+        # Префикс приложения и общее время жизни
         self.__prefix = prefix
         self.__expire = expire
 
