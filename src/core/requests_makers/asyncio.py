@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from typing import Callable, Awaitable
+from typing import Callable, Awaitable, Any
 
 import aiohttp
 
@@ -81,6 +81,14 @@ class HttpMakerAsync:
             spec_app_prefix=spec_app_prefix
         )
 
+    @staticmethod
+    def __prepare_params(params: dict[str, Any]) -> dict[str, Any]:
+        """Подготовка параметров к адекватной передачи в httpx"""
+        for k, v in params.items():
+            if type(v) is bool:
+                params[k] = "true" if v else "false"
+        return params
+
     async def __execute(
         self,
         path: str,
@@ -114,6 +122,7 @@ class HttpMakerAsync:
             params = {**self.__params, **params}
         else:
             params = self.__params
+        params = self.__prepare_params(params)
         try:
             async with aiohttp.ClientSession(
                 timeout=aiohttp.ClientTimeout(total=self.__timeout)
