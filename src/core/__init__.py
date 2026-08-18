@@ -4,7 +4,6 @@ from . import debug
 from . import dot_env
 from . import fast_decorators
 from . import fast_depends
-from . import fast_middlewares
 from . import redis_client
 from . import requests_makers
 from . import sql_repository
@@ -19,7 +18,6 @@ __all__ = (
     'dot_env',
     'fast_decorators',
     'fast_depends',
-    'fast_middlewares',
     'redis_client',
     'requests_makers',
     'sql_repository',
