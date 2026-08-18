@@ -1,3 +1,4 @@
+import logging
 from time import time
 from typing import Callable
 from functools import wraps
@@ -6,6 +7,9 @@ from dataclasses import is_dataclass, asdict
 from fastapi import HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import DeclarativeBase
+
+
+logger = logging.getLogger(__name__)
 
 
 class CacheDecoratorException(Exception):
@@ -37,11 +41,12 @@ def cache_path(expire: int = 1800, debug: bool = False):
             except AttributeError:
                 return await func(*args, **kwargs)
 
+            key = f'{request.url.path}{f'?{request.url.query}' if request.url.query != "" else ""}'
+            if debug:
+                logger.debug(f'{cache_path.__name__} > get "{key}"')
+
             # Получаем данные с редиса если они есть
-            ans = await redis.get_json(
-                f'{request.url.path}{f'?{request.url.query}' if request.url.query != "" else ""}',
-                debug=debug
-            )
+            ans = await redis.get_json(key, debug=debug)
             if ans is not None and ans.get('exp') and int(time()) < ans['exp']:
                 return ans
 
@@ -71,10 +76,7 @@ def cache_path(expire: int = 1800, debug: bool = False):
             ans['exp'] = int(time() + expire)
 
             # Сохраняем ответ в кэш
-            await redis.set_json(
-                f'{request.url.path}{f'?{request.url.query}' if request.url.query != "" else ""}', ans,
-                debug=debug
-            )
+            await redis.set_json(key, ans, debug=debug)
             return ans
         return wrapper
     return decorator
