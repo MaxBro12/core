@@ -27,15 +27,21 @@ def cache_path(expire: int = 1800, debug: bool = False):
         @wraps(func)
         async def wrapper(*args, **kwargs) -> dict | None | HTTPException:
             # Получаем request и redis
-            request = kwargs.get('request')
-            redis = kwargs.get('redis')
+            try:
+                request = kwargs.get('request')
+                redis = kwargs.get('redis') or request.app.state.redis
 
-            # нету не реквеста не редиса логика кэша заканчивается
-            if request is None or redis is None:
+                # нету не реквеста не редиса логика кэша заканчивается
+                if request is None or redis is None:
+                    return await func(*args, **kwargs)
+            except AttributeError:
                 return await func(*args, **kwargs)
 
             # Получаем данные с редиса если они есть
-            ans = await redis.get_json(f'{request.url.path}?{request.url.query}', debug=debug)
+            ans = await redis.get_json(
+                f'{request.url.path}{f'?{request.url.query}' if request.url.query != "" else ""}',
+                debug=debug
+            )
             if ans is not None and ans.get('exp') and int(time()) < ans['exp']:
                 return ans
 
@@ -65,7 +71,10 @@ def cache_path(expire: int = 1800, debug: bool = False):
             ans['exp'] = int(time() + expire)
 
             # Сохраняем ответ в кэш
-            await redis.set_json(f'{request.url.path}?{request.url.query}', ans, debug=debug)
+            await redis.set_json(
+                f'{request.url.path}{f'?{request.url.query}' if request.url.query != "" else ""}', ans,
+                debug=debug
+            )
             return ans
         return wrapper
     return decorator
