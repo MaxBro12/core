@@ -1,6 +1,6 @@
 import logging
 from time import time
-from typing import Callable
+from typing import Any, Callable
 from functools import wraps
 from dataclasses import is_dataclass, asdict
 
@@ -21,6 +21,40 @@ class CantConvertBaseModel(CacheDecoratorException):
     """Исключение для BaseModel"""
     def __init__(self, model: DeclarativeBase):
         super().__init__(f'Cannot convert model {model.__name__} to dict')
+
+
+class CantConvertAns(CacheDecoratorException):
+    """Исключение для неудачного преобразования ответа в словарь"""
+    def __init__(self, ans: Any):
+        super().__init__(f'Cannot convert ans {ans} to dict')
+
+
+def __ans_to_dict(ans: Any) -> dict | HTTPException | None:
+    """
+    Пытается преобразовать ответ в словарь, игнорируя HTTPException и None.
+    """
+    # Пустой ответ
+    if ans is None:
+        return None
+    # HTTPException - игнорируем
+    elif isinstance(ans, HTTPException):
+        return ans
+    # Dataclass - преобразуем в словарь
+    elif is_dataclass(ans):
+        return asdict(ans)
+    # BaseModel - преобразуем в словарь
+    elif isinstance(ans, BaseModel):
+        return ans.model_dump()
+    # SqlAlchemy model - преобразуем в словарь
+    elif isinstance(ans, DeclarativeBase):
+        m_dict = ans.__dict__
+        if type(m_dict) is not dict:
+            raise CantConvertBaseModel(ans)
+        return m_dict
+    elif isinstance(ans, dict):
+        return ans
+    else:
+        raise CantConvertAns(ans)
 
 
 def cache_path(expire: int = 1800, debug: bool = False):
@@ -53,24 +87,10 @@ def cache_path(expire: int = 1800, debug: bool = False):
             # Выполняем функцию
             ans = await func(*args, **kwargs)
 
-            # Пустой ответ
-            if ans is None:
-                return None
-            # HTTPException - игнорируем
-            elif isinstance(ans, HTTPException):
+            # Преобразуем ответ в словарь
+            ans = __ans_to_dict(ans)
+            if isinstance(ans, HTTPException) or ans is None:
                 return ans
-            # Dataclass - преобразуем в словарь
-            elif is_dataclass(ans):
-                ans = asdict(ans)
-            # BaseModel - преобразуем в словарь
-            elif isinstance(ans, BaseModel):
-                ans = ans.model_dump()
-            # SqlAlchemy model - преобразуем в словарь
-            elif isinstance(ans, DeclarativeBase):
-                m_dict = ans.__dict__
-                if type(m_dict) is not dict:
-                    raise CantConvertBaseModel(ans)
-                ans = m_dict
 
             # Добавляем время истечения к ответу
             ans['exp'] = int(time() + expire)
@@ -101,26 +121,13 @@ def cache(key: str, expire: int = 1800, debug: bool = False): # 30 минут
             if r_ans is not None and r_ans.get('exp') and time() < r_ans['exp']:
                 return r_ans
 
+            # Выполняем функцию
             ans = await func(*args, **kwargs)
 
-            # Пустой ответ
-            if ans is None:
-                return None
-            # HTTPException - игнорируем
-            elif isinstance(ans, HTTPException):
+            # Преобразуем ответ в словарь
+            ans = __ans_to_dict(ans)
+            if isinstance(ans, HTTPException) or ans is None:
                 return ans
-            # Dataclass - преобразуем в словарь
-            elif is_dataclass(ans):
-                ans = asdict(ans)
-            # BaseModel - преобразуем в словарь
-            elif isinstance(ans, BaseModel):
-                ans = ans.model_dump()
-            # SqlAlchemy model - преобразуем в словарь
-            elif isinstance(ans, DeclarativeBase):
-                m_dict = ans.__dict__
-                if type(m_dict) is not dict:
-                    raise CantConvertBaseModel(ans)
-                ans = m_dict
 
             # Добавляем время истечения к ответу
             ans['exp'] = time() + expire

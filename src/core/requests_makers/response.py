@@ -8,6 +8,16 @@ Method = Literal['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'PATCH', 'OPTIONS']
 
 @dataclass(frozen=True, slots=True)
 class ResponseData:
+    """
+    Класс ответа на запрос:
+        - url: URL запроса
+        - status: статус код ответа
+        - headers: заголовки ответа
+        - json: данные ответа в формате json
+        - date: дата и время когда пришел ответ: datetime
+        - time: время ответа в формате timestamp: int
+    """
+
     url: str
     status: int
     headers: dict
@@ -16,6 +26,9 @@ class ResponseData:
 
     @property
     def time(self) -> int:
+        """
+        Возвращает время ответа в формате timestamp: int
+        """
         return int(self.date.timestamp())
 
     def __str__(self) -> str:
