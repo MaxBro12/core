@@ -68,7 +68,6 @@ class RedisClient:
         async for k in self.__client.scan_iter(f'{key}*'):
             await self.__client.unlink(k)
 
-
     async def set_json(self, key: str, data: dict, expire: int | None = None, debug: bool = False):
         """
         Сохраняет JSON данные в Redis.

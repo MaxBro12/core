@@ -12,7 +12,17 @@ class ResponseData:
     status: int
     headers: dict
     json: dict
-    time: datetime = datetime.now()
+    date: datetime = datetime.now()
+
+    @property
+    def time(self) -> int:
+        return int(self.date.timestamp())
+
+    def __str__(self) -> str:
+        return f'{self.url} > {self.status}'
+
+    def __repr__(self) -> str:
+        return f'Response(url={self.url}, status={self.status}, headers={self.headers}, json={self.json}, time={self.time})'
 
 
 def time_to_json(time: datetime):
