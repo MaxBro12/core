@@ -36,6 +36,9 @@ def __ans_to_dict(ans: Any) -> dict | HTTPException | None:
     # Пустой ответ
     if ans is None:
         return None
+    # Dict - словарь он и так слвоарь
+    elif isinstance(ans, dict):
+        return ans
     # HTTPException - игнорируем
     elif isinstance(ans, HTTPException):
         return ans
@@ -51,10 +54,7 @@ def __ans_to_dict(ans: Any) -> dict | HTTPException | None:
         if type(m_dict) is not dict:
             raise CantConvertBaseModel(ans)
         return m_dict
-    elif isinstance(ans, dict):
-        return ans
-    else:
-        raise CantConvertAns(ans)
+    raise CantConvertAns(ans)
 
 
 def cache_path(expire: int = 1800, debug: bool = False):
