@@ -83,7 +83,7 @@ class HttpMakerMicroAsync:
         """
         redis_cl = redis or self.__redis_client
         if redis_cl and self.__redis_prefix:
-            return await redis.get_json(
+            return await redis_cl.get_json(
                 key=key,
                 spec_app_prefix=self.__redis_prefix
             )
