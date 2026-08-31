@@ -187,8 +187,11 @@ class HttpMakerMicroAsync:
         """
         logging.debug(f'{self.__class__.__name__} > {method} -> {path}')
 
+        if key is None:
+            key = path
+
         # Попытка получить кэш
-        if use_cache and key is not None:
+        if use_cache:
             cached_data = await self.__cache(key=key, redis=redis)
             if cached_data is not None:
                 return ResponseData(
