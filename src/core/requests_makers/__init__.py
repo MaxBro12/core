@@ -1,7 +1,8 @@
 import logging
 
 from .asyncio import HttpMakerAsync
-from .asyncio_micro_service import HttpMakerMicroAsync
+from .asyncio_micro import HttpMakerMicroAsync
+from .asyncio_micro_long import HttpMakerMicroAsyncLong
 from .response import ResponseData
 from .exceptions import RequestMethodNotFoundException
 
@@ -9,6 +10,7 @@ from .exceptions import RequestMethodNotFoundException
 __all__ = (
     'HttpMakerAsync',
     'HttpMakerMicroAsync',
+    'HttpMakerMicroAsyncLong',
     'ResponseData',
     'RequestMethodNotFoundException',
 )

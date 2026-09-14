@@ -1,11 +1,12 @@
 import asyncio
 import logging
-from typing import Callable, Awaitable, Any
+from typing import Callable, Awaitable
 
 import aiohttp
 
 from core.redis_client import RedisClient
 
+from .tools import prepare_params
 from .exceptions import OutOfTries, RequestMethodNotFoundException, UnableToParse
 from .response import ResponseData, Method
 
@@ -81,14 +82,6 @@ class HttpMakerAsync:
             spec_app_prefix=spec_app_prefix
         )
 
-    @staticmethod
-    def __prepare_params(params: dict[str, Any]) -> dict[str, Any]:
-        """Подготовка параметров к адекватной передачи в httpx"""
-        for k, v in params.items():
-            if type(v) is bool:
-                params[k] = "true" if v else "false"
-        return params
-
     async def __execute(
         self,
         path: str,
@@ -122,7 +115,7 @@ class HttpMakerAsync:
             params = {**self.__params, **params}
         else:
             params = self.__params
-        params = self.__prepare_params(params)
+        params = prepare_params(dict(params))
         try:
             async with aiohttp.ClientSession(
                 timeout=aiohttp.ClientTimeout(total=self.__timeout)

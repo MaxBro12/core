@@ -8,6 +8,7 @@ from core.redis_client import RedisClient
 
 from .exceptions import RequestMethodNotFoundException, UnableToParse, MicroServiceUrlUnknown
 from .response import ResponseData, Method
+from .tools import prepare_params
 
 
 logger = logging.getLogger(__name__)
@@ -50,14 +51,11 @@ class HttpMakerMicroAsync:
             raise MicroServiceUrlUnknown()
 
         self.__base_url = base_url.rstrip('/')
-
-        if base_headers is None:
-            base_headers = {}
-        self.__headers = base_headers   # это должен быть словарь
-
-        if base_params is None:
-            base_params = {}
-        self.__params = base_params    # это должен быть словарь
+        self.__headers = base_headers or {}
+        self.__params = base_params or {}
+        self.__timeout = timeout_in_sec
+        self.__redis_prefix = redis_prefix
+        self.__redis_client = redis_client
 
         self.__timeout = timeout_in_sec
         self.__redis_prefix = redis_prefix
@@ -88,14 +86,6 @@ class HttpMakerMicroAsync:
                 spec_app_prefix=self.__redis_prefix
             )
         return None
-
-    @staticmethod
-    def __prepare_params(params: dict[str, Any]) -> dict[str, Any]:
-        """Подготовка параметров к адекватной передачи в httpx"""
-        for k, v in params.items():
-            if type(v) is bool:
-                params[k] = "true" if v else "false"
-        return params
 
     async def __execute(
         self,
@@ -128,7 +118,7 @@ class HttpMakerMicroAsync:
             params = {**self.__params, **params}
         else:
             params = self.__params
-        params = self.__prepare_params(params)
+        params = prepare_params(dict(params))
         try:
             async with aiohttp.ClientSession(
                 timeout=aiohttp.ClientTimeout(total=self.__timeout)
