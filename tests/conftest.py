@@ -101,3 +101,16 @@ async def redis_client(mock_redis, mock_redis_pool):
         # Заменяем приватный клиент на наш мок
         client._RedisClient__client = mock_redis
         return client
+
+
+@pytest.fixture
+def mock_http_session():
+    session = MagicMock()
+    session.closed = False
+    session.get = MagicMock()
+    session.post = MagicMock()
+    session.put = MagicMock()
+    session.delete = MagicMock()
+    session.patch = MagicMock()
+    
+    return session

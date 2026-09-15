@@ -96,16 +96,16 @@ class HttpMakerMicroAsyncLong:
             except RuntimeError:
                 loop = None
             if loop is not None:
-                self._session = self._build_session()
+                self._session = self.__build_session()
 
-    def _build_session(self) -> aiohttp.ClientSession:
+    def __build_session(self) -> aiohttp.ClientSession:
         """Создаёт новую сессию с настроенным коннектором и таймаутом."""
         if self._connector is None:
             self._connector = aiohttp.TCPConnector(
                 limit=self._connector_limit,
                 limit_per_host=self._connector_limit_per_host,
                 ttl_dns_cache=self._connector_ttl_dns_cache,
-                enable_cleanup_closed=self._enable_cleanup_closed,
+                #enable_cleanup_closed=self._enable_cleanup_closed,
             )
         timeout = aiohttp.ClientTimeout(total=self.__timeout)
         return aiohttp.ClientSession(
@@ -114,7 +114,7 @@ class HttpMakerMicroAsyncLong:
             headers=self.__headers or None,
         )
 
-    async def _ensure_session(self) -> aiohttp.ClientSession:
+    async def __ensure_session(self) -> aiohttp.ClientSession:
         """Ленивое создание сессии. Потокобезопасно в рамках loop."""
         if self._session is not None and not self._session.closed:
             return self._session
@@ -124,7 +124,7 @@ class HttpMakerMicroAsyncLong:
 
         async with self._session_lock:
             if self._session is None or self._session.closed:
-                self._session = self._build_session()
+                self._session = self.__build_session()
             return self._session
 
     async def close(self) -> None:
@@ -140,7 +140,7 @@ class HttpMakerMicroAsyncLong:
             self._connector = None
 
     async def __aenter__(self) -> Self:
-        await self._ensure_session()
+        await self.__ensure_session()
         return self
 
     async def __aexit__(self, exc_type, exc, tb) -> None:
@@ -179,13 +179,23 @@ class HttpMakerMicroAsyncLong:
             params = self.__params
         params = prepare_params(dict(params))  # копия, чтобы не мутировать базовые
 
-        session = await self._ensure_session()
+        session = await self.__ensure_session()
+        #raise Exception('ok good', type(session))
 
         try:
-            http_method = getattr(session, method.lower())
-        except AttributeError as e:
+            session_methods = {
+                'GET': session.get,
+                'POST': session.post,
+                'PUT': session.put,
+                'PATCH': session.patch,
+                'DELETE': session.delete,
+                'HEAD': session.head,
+                'OPTIONS': session.options,
+            }
+            http_method = session_methods[method.upper()]
+        except KeyError:
             logging.critical(
-                f"{self.__class__.__name__} > method not found > {e}"
+                f"{self.__class__.__name__} > method not found > {method}"
             )
             raise RequestMethodNotFoundException(method)
 
