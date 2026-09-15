@@ -1,6 +1,7 @@
 import asyncio
 import logging
-from typing import Any, Coroutine, Self
+from typing import Any, Self
+from collections.abc import Coroutine
 
 import aiohttp
 

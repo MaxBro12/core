@@ -1,9 +1,9 @@
-from core.redis_client import RedisClient
 import pytest
 
 from .tools import make_response
-from src.core.requests_makers.asyncio_micro_long import HttpMakerMicroAsyncLong
+from src.core.redis_client import RedisClient
 from src.core.requests_makers.exceptions import RequestMethodNotFoundException, MicroServiceUrlUnknown
+from src.core.requests_makers.asyncio_micro_long import HttpMakerMicroAsyncLong
 
 
 async def test_full_path():
@@ -65,10 +65,4 @@ async def test_not_redis(mock_http_session, redis_client: RedisClient):
     a = HttpMakerMicroAsyncLong('http:127.0.0.1', session=mock_http_session, redis_prefix='test_prefix')
     d = await a.post('/test', redis=redis_client, key='wrong_key')
     assert d.json['ok']
-
-
-
-
-
-
 
