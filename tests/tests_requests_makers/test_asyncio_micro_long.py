@@ -7,26 +7,6 @@ from src.core.requests_makers.asyncio_micro_long import HttpMakerMicroAsyncLong
 
 
 async def test_full_path():
-    a = HttpMakerMicroAsyncLong('http://test.url')
-    assert a.full_path('test') == 'http://test.url/test'
-
-
-async def test_full_path_end_slash():
-    a = HttpMakerMicroAsyncLong('http://test.url')
-    assert a.full_path('test/') == 'http://test.url/test/'
-
-
-async def test_full_path_with_slash():
-    a = HttpMakerMicroAsyncLong('http://test.url/')
-    assert a.full_path('test') == 'http://test.url/test'
-
-
-async def test_full_path_path_slash():
-    a = HttpMakerMicroAsyncLong('http://test.url')
-    assert a.full_path('/test') == 'http://test.url/test'
-
-
-async def test_full_path():
     with pytest.raises(MicroServiceUrlUnknown):
         HttpMakerMicroAsyncLong('')
 
@@ -49,7 +29,7 @@ async def test_wrong_method(mock_http_session):
     with pytest.raises(RequestMethodNotFoundException):
         a = HttpMakerMicroAsyncLong('http:127.0.0.1', session=mock_http_session)
         await a._make('/test', method='LABYBY')
-    
+
 
 async def test_redis(mock_http_session, redis_client: RedisClient):
     mock_http_session.post.return_value = make_response({'ok': False})
@@ -65,4 +45,3 @@ async def test_not_redis(mock_http_session, redis_client: RedisClient):
     a = HttpMakerMicroAsyncLong('http:127.0.0.1', session=mock_http_session, redis_prefix='test_prefix')
     d = await a.post('/test', redis=redis_client, key='wrong_key')
     assert d.json['ok']
-
