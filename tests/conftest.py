@@ -112,5 +112,5 @@ def mock_http_session():
     session.put = MagicMock()
     session.delete = MagicMock()
     session.patch = MagicMock()
-    
+
     return session
