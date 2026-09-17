@@ -75,7 +75,7 @@ class HttpMakerAsyncBase:
         """Совмещает заголовки с базовыми"""
         if adt_headers:
             return {**self._headers, **adt_headers}
-        return self._headers
+        return dict(self._headers)
 
     def _full_params(self, adt_params: dict | None) -> dict:
         """Совмещает параметры с базовыми"""

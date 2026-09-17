@@ -7,7 +7,7 @@ import aiohttp
 from core.redis_client import RedisClient
 
 from .asyncio_base_pre_class import HttpMakerAsyncBaseMiddle
-from .exceptions import OutOfTries, RequestMethodNotFoundException
+from .exceptions import OutOfTries
 from .response import ResponseData, Method
 
 
