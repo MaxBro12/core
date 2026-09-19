@@ -130,8 +130,14 @@ async def test_extract_method_raise(mock_http_session):
 async def test_multi_call():
     async def a():
         await asyncio.sleep(1.5)
+        return 'a'
     async def b():
         await asyncio.sleep(1)
+        return 'b'
     st = time()
-    await HttpMakerAsyncBase.multi_call(a(), b())
+    a = await HttpMakerAsyncBase.multi_call(a(), b())
     assert time() - st <= 2
+    assert len(a) == 2
+    assert a[0] == 'a'
+    assert a[1] == 'b'
+

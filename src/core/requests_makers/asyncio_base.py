@@ -113,7 +113,7 @@ class HttpMakerAsyncBase:
             raise RequestMethodNotFoundException(method)
 
     @staticmethod
-    async def multi_call(*calls: Coroutine[Any, Any, Any]) -> tuple[ResponseData]:
+    async def multi_call(*calls: Coroutine[Any, Any, Any]) -> tuple[ResponseData, ...]:
         """Вызов нескольких запросов параллельно через TaskGroup."""
         tasks: list[asyncio.Task[Any]] = []
         async with asyncio.TaskGroup() as tg:
