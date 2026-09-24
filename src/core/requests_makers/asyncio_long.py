@@ -87,19 +87,16 @@ class HttpMakerAsyncLong(HttpMakerAsyncBaseMiddle, HttpMakerSessionControl):
         headers = self._full_haeders(headers)
         params = self._full_params(params)
 
-        kwargs: dict[str, Any] = dict(
-            url=self._full_path(path),
-            headers=headers,
-            params=params,
-            data=data,
-            json=json,
-        )
-        if request_timeout is not None:
-            kwargs["timeout"] = aiohttp.ClientTimeout(total=request_timeout or self._timeout)
-
         for _ in range(self._tries_to_reconnect):
             try:
-                async with http_method(**kwargs) as res:
+                async with http_method(
+                    url=self._full_path(path),
+                    headers=headers,
+                    params=params,
+                    data=data,
+                    json=json,
+                    timeout=aiohttp.ClientTimeout(total=request_timeout or self._timeout)
+                ) as res:
                     return await self._get_response_data(res)
             except aiohttp.ClientConnectorError as e:
                 logging.error(f'{self.__class__.__name__} > Client connection error {e}')

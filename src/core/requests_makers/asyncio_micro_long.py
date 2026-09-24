@@ -90,25 +90,15 @@ class HttpMakerMicroAsyncLong(HttpMakerAsyncMicroBase, HttpMakerSessionControl):
         headers = self._full_haeders(headers)
         params = self._full_params(params)
 
-        # Per-request timeout (если задан) — иначе используется timeout сессии.
-        #timeout = (
-        #    aiohttp.ClientTimeout(total=request_timeout)
-        #    if request_timeout is not None
-        #    else aiohttp.helpers.sentinel  # noqa: F821 — не используется, см. ниже
-        #)
-
-        kwargs: dict[str, Any] = dict(
-            url=self._full_path(path),
-            headers=headers,
-            params=params,
-            data=data,
-            json=json,
-        )
-        if request_timeout is not None:
-            kwargs["timeout"] = aiohttp.ClientTimeout(total=request_timeout or self._timeout)
-
         try:
-            async with http_method(**kwargs) as res:
+            async with http_method(
+                url=self._full_path(path),
+                headers=headers,
+                params=params,
+                data=data,
+                json=json,
+                timeout=aiohttp.ClientTimeout(total=request_timeout or self._timeout)
+            ) as res:
                 return await self._get_simple_response(res)
         except (
             aiohttp.ClientConnectorError,
@@ -116,7 +106,7 @@ class HttpMakerMicroAsyncLong(HttpMakerAsyncMicroBase, HttpMakerSessionControl):
             aiohttp.ConnectionTimeoutError,
         ) as e:
             logging.error(f"{self.__class__.__name__} > error > {e}")
-            raise
+            raise e
 
     async def _make(
         self,

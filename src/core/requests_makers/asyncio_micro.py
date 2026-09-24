@@ -85,6 +85,7 @@ class HttpMakerMicroAsync(HttpMakerAsyncMicroBase):
                     params=params,
                     data=data,
                     json=json,
+                    timeout=aiohttp.ClientTimeout(total=request_timeout or self._timeout)
                 ) as res:
                     return await self._get_simple_response(res)
             except (aiohttp.ClientConnectorError, aiohttp.ClientError, aiohttp.ConnectionTimeoutError) as e:

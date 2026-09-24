@@ -87,6 +87,7 @@ class HttpMakerAsync(HttpMakerAsyncBaseMiddle):
                         params=params,
                         data=data,
                         json=json,
+                        timeout=aiohttp.ClientTimeout(total=request_timeout or self._timeout)
                     ) as res:
                         return await self._get_response_data(res)
                 except aiohttp.ClientConnectorError as e:
