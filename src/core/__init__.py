@@ -1,4 +1,4 @@
-__version__ = '0.1.8a'
+__version__ = '0.1.8b'
 
 from . import debug
 from . import dot_env

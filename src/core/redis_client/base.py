@@ -5,13 +5,12 @@ from typing import Any
 from redis.exceptions import ConnectionError
 import redis.asyncio as redis_a
 
-from .exceptions import RedisConnectionError
-
 
 logger = logging.getLogger(__name__)
 
 
 class RedisClient:
+    __client: redis_a.Redis
     """
     Клиент для взаимодействия с Redis.
     Необходим для автоматического управления ключами и соединениям с RedisDep.
@@ -29,12 +28,6 @@ class RedisClient:
         """
         # Создаем клиент и пытаемся подключиться, если не получиться пробрасываем исключение
         self.__client = redis_a.Redis(connection_pool=redis_pool)
-        try:
-            if self.__client.ping():
-                logger.info(f'RedisClient connected')
-        except redis_a.ConnectionError as e:
-            logger.critical(f'Redis connection error: {e}')
-            raise RedisConnectionError()
 
         # Префикс приложения и общее время жизни
         self.__prefix = prefix
@@ -110,3 +103,7 @@ class RedisClient:
             return json.loads(ans)
         except ConnectionError:
             return None
+
+    async def ping(self):
+        """Короткий метод ping"""
+        return await self.__client.ping()
