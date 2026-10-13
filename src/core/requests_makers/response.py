@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Literal
+from typing import Literal, Any
+
+
+from .exceptions import ResponseStatusError
 
 
 Method = Literal['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'PATCH', 'OPTIONS']
@@ -30,6 +33,19 @@ class ResponseData:
         Возвращает время ответа в формате timestamp: int
         """
         return int(self.date.timestamp())
+
+    def raise_for_status(self, not_trigger_codes: list[int] | tuple[int, ...] | None = None) -> None:
+        """
+        Проверка статуса ответа, если он не 200, 204 вызывается ResponseStatusError
+        Можно добавить коды на которые ошибка не будет райзиться.
+        """
+        if not_trigger_codes is None:
+            not_trigger_codes = ()
+        if self.status not in {200,204, *not_trigger_codes}:
+            raise ResponseStatusError(self.status, self.headers, self.json)
+
+    def __getitem__(self, key: str) -> Any:
+        return self.json[key]
 
     def __str__(self) -> str:
         return f'{self.url} > {self.status}'
