@@ -17,7 +17,7 @@ class RedisClient:
     При создании попробует подключиться к redis, при ошибке вызовет RedisConnectionError
     """
 
-    def __init__(self, redis_pool: redis_a.ConnectionPool, prefix: str, expire: int = 3600):
+    def __init__(self, redis_pool: redis_a.ConnectionPool, prefix: str, expire: int = 3600, decode_responses: bool = True):
         """
         Инициализирует экземпляр RedisClient.
 
@@ -27,7 +27,7 @@ class RedisClient:
             expire: Стандартный срок жизни ключей в секундах (по умолчанию 3600).
         """
         # Создаем клиент и пытаемся подключиться, если не получиться пробрасываем исключение
-        self.__client = redis_a.Redis(connection_pool=redis_pool)
+        self.__client = redis_a.Redis(connection_pool=redis_pool, decode_responses=decode_responses)
 
         # Префикс приложения и общее время жизни
         self.__prefix = prefix
@@ -101,6 +101,51 @@ class RedisClient:
             if ans is None:
                 return None
             return json.loads(ans)
+        except ConnectionError:
+            return None
+
+    async def set(
+        self, key: str, value: str | bytes | int | float, 
+        expire: int | None = None, debug: bool = False
+    ) -> bool:
+        """
+        Сохраняет данные в Redis.
+        - key: Ключ для сохранения данных.
+        - data: Данные для сохранения.
+        - debug: Включить отладочный режим? Выведет полный ключ сохранения.
+        """
+        if debug:
+            logger.debug(f'set_json: {self.__insert_prefix_key(key)} > {value}')
+        try:
+            await self.__client.set(
+                self.__insert_prefix_key(key),
+                value,
+                ex=expire if expire is not None else self.__expire
+            )
+            return True
+        except ConnectionError:
+            return False
+
+    async def get(
+        self,
+        key: str,
+        spec_app_prefix: str | None = None,
+        debug: bool = False
+    ) -> str | bytes | int | float | None:
+        """
+        Получает данные из Redis по ключу.
+        - key: Ключ для получения данных.
+        - spec_app_prefix: Префикс приложения для ключа если нужно использовать вне приложения.
+        - debug: Включить отладочный режим? Выведет полный ключ получения.
+        """
+        key = self.__insert_prefix_key(key, spec_app_prefix=spec_app_prefix)
+        try:
+            ans = await self.__client.get(key)
+            if debug:
+                logger.debug(
+                    f'get_json: {key} > {ans}'
+                )
+            return ans
         except ConnectionError:
             return None
 
