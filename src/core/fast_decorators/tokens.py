@@ -1,7 +1,7 @@
 import time
 from functools import wraps
 
-from fastapi import HTTPException, Request
+from fastapi import HTTPException
 
 
 def token_global(
@@ -16,10 +16,23 @@ def token_global(
     если код 404 вычитается debuff_value
     debuff_value - значение на которое уменьшится карзина токенов при плохом статусе
     """
+    tokens = capacity
+    last = time.monotonic()
+
     def decorator(func):
         @wraps(func)
-        async def wrapper(*args, request: request | none = none, **kwargs):
-            raise NotImplementedError
+        async def wrapper(*args, **kwargs):
+            now = time.monotonic()
+            new_tokens = min(capacity, tokens + (now - last) * rate)
+            if new_tokens < 1:
+                raise HTTPException(
+                    status_code=429,
+                    detail="Too many requests",
+                    headers={"Retry-After": str(int((1 - new_tokens) / rate) + 1)},
+                )
+            tokens = new_tokens - 1
+            last = now
+            return await func(*args, **kwargs)
         return wrapper
     return decorator
 
