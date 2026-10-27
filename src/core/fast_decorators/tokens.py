@@ -41,6 +41,7 @@ def token_global(
             else:
                 tokens -= debuff_value
             tokens = max(0.0, tokens)
+            return res
         return wrapper
     return decorator
 
