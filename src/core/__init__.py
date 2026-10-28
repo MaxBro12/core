@@ -7,10 +7,8 @@ from . import fast_depends
 from . import redis_client
 from . import requests_makers
 from . import sql_repository
-from . import simplejwt
 from . import pydantic_misc_models
 from . import spec_time
-from . import trash
 
 
 __all__ = (
@@ -21,8 +19,6 @@ __all__ = (
     'redis_client',
     'requests_makers',
     'sql_repository',
-    'simplejwt',
     'pydantic_misc_models',
     'spec_time',
-    'trash',
 )

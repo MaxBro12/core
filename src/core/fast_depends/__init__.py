@@ -1,7 +1,7 @@
-from .pagination_params import PaginationParams, PaginationParamsClass
+from .pagination_params import PaginationParams, PaginationDep
 
 
 __all__ = (
     "PaginationParams",
-    "PaginationParamsClass",
+    "PaginationDep",
 )

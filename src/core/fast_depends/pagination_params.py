@@ -5,13 +5,13 @@ from fastapi import Depends
 
 
 @dataclass(frozen=True, slots=True)
-class PaginationParamsClass:
-    skip: int | None = None
-    limit: int | None = None
+class PaginationParams:
+    skip: int = 0
+    limit: int = 100
 
 
-def pagination_params(skip: int | None = None, limit: int | None = None):
-    return PaginationParamsClass(skip, limit)
+def pagination_params(skip: int = 0, limit: int = 100):
+    return PaginationParams(skip, limit)
 
 
-PaginationParams = Annotated[PaginationParamsClass, Depends(pagination_params)]
+PaginationDep = Annotated[PaginationParams, Depends(pagination_params)]
