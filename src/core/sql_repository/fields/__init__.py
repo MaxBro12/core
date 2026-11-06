@@ -1,8 +1,8 @@
-from .utc_secure import UTCDatetime
-from .tzdatetime import TZDatetime
+from .utc_secure import UTCDateTime
+from .tzdatetime import TZDateTime
 
 
 __all__ = (
-    'UTCDatetime',
-    'TZDatetime',
+    'UTCDateTime',
+    'TZDateTime',
 )

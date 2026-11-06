@@ -2,7 +2,7 @@ from datetime import timezone
 from sqlalchemy import TypeDecorator, DateTime
 
 
-class TZDatetime(TypeDecorator):
+class TZDateTime(TypeDecorator):
     """
     Кастомный тип который конвертирует дату в дату с указанием tz
     Использование:

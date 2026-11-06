@@ -2,7 +2,7 @@ from datetime import timezone
 from sqlalchemy import TypeDecorator, DateTime
 
 
-class UTCDatetime(TypeDecorator):
+class UTCDateTime(TypeDecorator):
     """
     Кастомный тип который всегда возвращает utc datetime
     """
