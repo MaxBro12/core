@@ -7,6 +7,7 @@ import aiohttp
 from core.redis_client import RedisClient
 
 from .asyncio_base_pre_class import HttpMakerAsyncBaseMiddle
+from .asyncio_base import JsonLike
 from .exceptions import OutOfTries
 from .response import ResponseData, Method
 
@@ -52,8 +53,8 @@ class HttpMakerAsync(HttpMakerAsyncBaseMiddle):
         self,
         path: str,
         method: Method,
-        data: dict | str | None = None,
-        json: dict | None = None,
+        data: dict | str | dataclass | BaseModel | None = None,
+        json: JsonLike = None,
         params: dict | None = None,
         headers: dict | None = None,
         try_wait_if_error: bool = True,
@@ -73,6 +74,7 @@ class HttpMakerAsync(HttpMakerAsyncBaseMiddle):
         """
         headers = self._full_haeders(headers)
         params = self._full_params(params)
+        json = self._model_to_json_str(json)
         async with aiohttp.ClientSession(
             timeout=aiohttp.ClientTimeout(total=request_timeout or self._timeout)
         ) as session:
@@ -117,7 +119,7 @@ class HttpMakerAsync(HttpMakerAsyncBaseMiddle):
         path: str = '',
         method: Method = 'GET',
         data: dict | str | None = None,
-        json: dict | None = None,
+        json: JsonLike = None,
         params: dict | None = None,
         headers: dict | None = None,
         try_wait_if_error: bool = True,

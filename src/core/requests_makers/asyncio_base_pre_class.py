@@ -1,11 +1,13 @@
 import logging
 from typing import Callable, Awaitable
+from dataclasses import dataclass
 
 import aiohttp
 
 from core.redis_client import RedisClient
+from pydantic import BaseModel
 
-from .asyncio_base import HttpMakerAsyncBase
+from .asyncio_base import HttpMakerAsyncBase, JsonLike
 from .response import ResponseData, Method
 from .exceptions import UnableToParse
 
@@ -106,7 +108,7 @@ class HttpMakerAsyncBaseMiddle(HttpMakerAsyncBase):
         path: str = '',
         method: Method = 'GET',
         data: dict | str | None = None,
-        json: dict | None = None,
+        json: JsonLike = None,
         params: dict | None = None,
         headers: dict | None = None,
         try_wait_if_error: bool = True,
@@ -121,7 +123,7 @@ class HttpMakerAsyncBaseMiddle(HttpMakerAsyncBase):
         self,
         path: str = '',
         data: dict | str | None = None,
-        json: dict | None = None,
+        json: JsonLike = None,
         params: dict | None = None,
         headers: dict | None = None,
         try_wait_if_error: bool = True,
@@ -142,7 +144,7 @@ class HttpMakerAsyncBaseMiddle(HttpMakerAsyncBase):
         self,
         path: str = '',
         data: dict | str | None = None,
-        json: dict | None = None,
+        json: JsonLike = None,
         params: dict | None = None,
         headers: dict | None = None,
         try_wait_if_error: bool = True,
@@ -163,7 +165,7 @@ class HttpMakerAsyncBaseMiddle(HttpMakerAsyncBase):
         self,
         path: str = '',
         data: dict | str | None = None,
-        json: dict | None = None,
+        json: JsonLike = None,
         params: dict | None = None,
         headers: dict | None = None,
         try_wait_if_error: bool = True,
@@ -184,7 +186,7 @@ class HttpMakerAsyncBaseMiddle(HttpMakerAsyncBase):
         self,
         path: str = '',
         data: dict | str | None = None,
-        json: dict | None = None,
+        json: JsonLike = None,
         params: dict | None = None,
         headers: dict | None = None,
         try_wait_if_error: bool = True,
@@ -205,7 +207,7 @@ class HttpMakerAsyncBaseMiddle(HttpMakerAsyncBase):
         self,
         path: str = '',
         data: dict | str | None = None,
-        json: dict | None = None,
+        json: JsonLike = None,
         params: dict | None = None,
         headers: dict | None = None,
         try_wait_if_error: bool = True,
@@ -226,7 +228,7 @@ class HttpMakerAsyncBaseMiddle(HttpMakerAsyncBase):
         self,
         path: str = '',
         data: dict | str | None = None,
-        json: dict | None = None,
+        json: JsonLike = None,
         params: dict | None = None,
         headers: dict | None = None,
         try_wait_if_error: bool = True,
@@ -247,7 +249,7 @@ class HttpMakerAsyncBaseMiddle(HttpMakerAsyncBase):
         self,
         path: str = '',
         data: dict | str | None = None,
-        json: dict | None = None,
+        json: JsonLike = None,
         params: dict | None = None,
         headers: dict | None = None,
         try_wait_if_error: bool = True,

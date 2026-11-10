@@ -27,6 +27,11 @@ class UnableToParse(RequestsMakersException):
         super().__init__(f'Unable to parse {url}')
 
 
+class UnsupportedObject(RequestsMakersException):
+    def __init__(self, model) -> None:
+        super().__init__(f'Cant convert model to json {type(model)}')
+
+
 class ResponseStatusError(RequestsMakersException):
     def __init__(self, status: int, headers: dict, json: dict) -> None:
         super().__init__(f'Response bad status {status}: {headers} > {json}')

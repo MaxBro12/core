@@ -5,6 +5,7 @@ import aiohttp
 
 from core.redis_client import RedisClient
 
+from .asyncio_base import JsonLike
 from .asyncio_micro_base import HttpMakerAsyncMicroBase
 from .response import ResponseData, Method
 
@@ -52,7 +53,7 @@ class HttpMakerMicroAsync(HttpMakerAsyncMicroBase):
         path: str,
         method: Method,
         data: dict | str | None = None,
-        json: dict | None = None,
+        json: JsonLike = None,
         params: dict | None = None,
         headers: dict | None = None,
         request_timeout: float | None = None,
@@ -71,6 +72,7 @@ class HttpMakerMicroAsync(HttpMakerAsyncMicroBase):
         """
         headers = self._full_haeders(headers)
         params = self._full_params(params)
+        json = self._model_to_json_str(json)
 
         async with aiohttp.ClientSession(
             timeout=aiohttp.ClientTimeout(total=request_timeout or self._timeout)
@@ -97,7 +99,7 @@ class HttpMakerMicroAsync(HttpMakerAsyncMicroBase):
         path: str,
         method: Method,
         data: dict | str | None = None,
-        json: dict | None = None,
+        json: JsonLike = None,
         params: dict | None = None,
         headers: dict | None = None,
         use_cache: bool = True,

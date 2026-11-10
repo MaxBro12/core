@@ -1,8 +1,11 @@
 import asyncio
 from time import time
+import json
+from pydantic import BaseModel
+from dataclasses import dataclass, asdict
 import pytest
 from src.core.requests_makers.asyncio_base import HttpMakerAsyncBase
-from src.core.requests_makers.exceptions import RequestMethodNotFoundException
+from src.core.requests_makers.exceptions import RequestMethodNotFoundException, UnsupportedObject
 
 
 async def test_init():
@@ -141,3 +144,100 @@ async def test_multi_call():
     assert a[0] == 'a'
     assert a[1] == 'b'
 
+
+async def test_model_dump_dict():
+    a = HttpMakerAsyncBase('')
+    t = {'a': 10, 1: 100,  1.2: '100'}
+    ans = a._model_to_json_str(t)
+
+    assert type(ans) is str
+    r = json.dumps(t)
+    assert ans == r
+    
+
+async def test_model_dataclass():
+    a = HttpMakerAsyncBase('')
+
+    @dataclass
+    class T1:
+        a: bool = True
+        a2: bool = False
+        b: str = '123456789qwertyuiopasdfghjklzxcvbnm,.<>/;:\'"[]{}'
+        c: float = 1.123456
+    t1 = T1()
+    
+    @dataclass(frozen=True, slots=True)
+    class T2:
+        a: bool = True
+        a2: bool = False
+        b: str = '123456789qwertyuiopasdfghjklzxcvbnm,.<>/;:\'"[]{}'
+        c: float = 1.123456
+    t2 = T2()
+    
+    @dataclass(slots=True)
+    class T3:
+        a: bool = True
+        a2: bool = False
+        b: str = '123456789qwertyuiopasdfghjklzxcvbnm,.<>/;:\'"[]{}'
+        c: float = 1.123456
+    t3 = T3()
+    
+    @dataclass(frozen=True)
+    class T4:
+        a: bool = True
+        a2: bool = False
+        b: str = '123456789qwertyuiopasdfghjklzxcvbnm,.<>/;:\'"[]{}'
+        c: float = 1.123456
+    t4 = T4()
+    
+    t1_a = a._model_to_json_str(t1)
+    t2_a = a._model_to_json_str(t2)
+    t3_a = a._model_to_json_str(t3)
+    t4_a = a._model_to_json_str(t4)
+
+    assert type(t1_a) is str
+    assert type(t2_a) is str
+    assert type(t3_a) is str
+    assert type(t4_a) is str
+
+    t1_b = T1(**json.loads(t1_a))
+    t2_b = T2(**json.loads(t2_a))
+    t3_b = T3(**json.loads(t3_a))
+    t4_b = T4(**json.loads(t4_a))
+    
+    assert t1 == t1_b
+    assert t2 == t2_b
+    assert t3 == t3_b
+    assert t4 == t4_b
+
+
+async def test_model_pydantic():
+    a = HttpMakerAsyncBase('')
+    class TestModel(BaseModel):
+        a: bool = True
+        a2: bool = False
+        b: str = '123456789qwertyuiopasdfghjklzxcvbnm,.<>/;:\'"[]{}'
+        c: float = 1.123456
+    t = TestModel()
+    t_a = a._model_to_json_str(t)
+    assert type(t_a) is str
+    t_b = TestModel(**json.loads(t_a))
+    assert t == t_b
+
+
+async def test_model_incorrect():
+    a = HttpMakerAsyncBase('')
+
+    class Model:
+        a: bool = True
+        a2: bool = False
+        b: str = '123456789qwertyuiopasdfghjklzxcvbnm,.<>/;:\'"[]{}'
+        c: float = 1.123456
+
+    with pytest.raises(UnsupportedObject):
+        a._model_to_json_str(Model())
+
+
+async def test_model_none():
+    a = HttpMakerAsyncBase('')
+    assert a._model_to_json_str(None) is None

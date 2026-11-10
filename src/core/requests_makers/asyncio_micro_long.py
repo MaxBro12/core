@@ -1,11 +1,12 @@
 import asyncio
 import logging
-from typing import Any
 
 import aiohttp
 
 from core.redis_client import RedisClient
+from core.requests_makers.asyncio_base import JsonLike
 
+from .asyncio_base import JsonLike
 from .asyncio_micro_base import HttpMakerAsyncMicroBase
 from .asyncio_session import HttpMakerSessionControl
 from .response import ResponseData, Method
@@ -79,7 +80,7 @@ class HttpMakerMicroAsyncLong(HttpMakerAsyncMicroBase, HttpMakerSessionControl):
         path: str,
         method: Method,
         data: dict | str | None = None,
-        json: dict | None = None,
+        json: JsonLike = None,
         params: dict | None = None,
         headers: dict | None = None,
         request_timeout: float | None = None,
@@ -89,6 +90,7 @@ class HttpMakerMicroAsyncLong(HttpMakerAsyncMicroBase, HttpMakerSessionControl):
 
         headers = self._full_haeders(headers)
         params = self._full_params(params)
+        json = self._model_to_json_str(json)
 
         try:
             async with http_method(
@@ -113,7 +115,7 @@ class HttpMakerMicroAsyncLong(HttpMakerAsyncMicroBase, HttpMakerSessionControl):
         path: str,
         method: Method,
         data: dict | str | None = None,
-        json: dict | None = None,
+        json: JsonLike = None,
         params: dict | None = None,
         headers: dict | None = None,
         use_cache: bool = True,

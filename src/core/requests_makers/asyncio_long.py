@@ -1,11 +1,12 @@
 import asyncio
 import logging
-from typing import Callable, Awaitable, Any
+from typing import Callable, Awaitable
 
 import aiohttp
 
 from core.redis_client import RedisClient
 
+from .asyncio_base import JsonLike
 from .asyncio_base_pre_class import HttpMakerAsyncBaseMiddle
 from .asyncio_session import HttpMakerSessionControl
 from .exceptions import OutOfTries
@@ -63,7 +64,7 @@ class HttpMakerAsyncLong(HttpMakerAsyncBaseMiddle, HttpMakerSessionControl):
         path: str,
         method: Method,
         data: dict | str | None = None,
-        json: dict | None = None,
+        json: JsonLike = None,
         params: dict | None = None,
         headers: dict | None = None,
         try_wait_if_error: bool = True,
@@ -86,7 +87,8 @@ class HttpMakerAsyncLong(HttpMakerAsyncBaseMiddle, HttpMakerSessionControl):
 
         headers = self._full_haeders(headers)
         params = self._full_params(params)
-
+        json = self._model_to_json_str(json)
+        
         for _ in range(self._tries_to_reconnect):
             try:
                 async with http_method(
@@ -125,7 +127,7 @@ class HttpMakerAsyncLong(HttpMakerAsyncBaseMiddle, HttpMakerSessionControl):
         path: str = '',
         method: Method = 'GET',
         data: dict | str | None = None,
-        json: dict | None = None,
+        json: JsonLike = None,
         params: dict | None = None,
         headers: dict | None = None,
         try_wait_if_error: bool = True,

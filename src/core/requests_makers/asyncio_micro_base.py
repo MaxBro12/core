@@ -1,6 +1,6 @@
 from core.redis_client import RedisClient
 
-from .asyncio_base import HttpMakerAsyncBase
+from .asyncio_base import HttpMakerAsyncBase, JsonLike
 from .exceptions import MicroServiceUrlUnknown
 from .response import ResponseData, Method
 
@@ -58,7 +58,7 @@ class HttpMakerAsyncMicroBase(HttpMakerAsyncBase):
         path: str,
         method: Method,
         data: dict | str | None = None,
-        json: dict | None = None,
+        json: JsonLike = None,
         params: dict | None = None,
         headers: dict | None = None,
         use_cache: bool = True,
@@ -74,7 +74,7 @@ class HttpMakerAsyncMicroBase(HttpMakerAsyncBase):
         self,
         path: str = "",
         data: dict | str | None = None,
-        json: dict | None = None,
+        json: JsonLike = None,
         params: dict | None = None,
         headers: dict | None = None,
         use_cache: bool = True,
@@ -95,7 +95,7 @@ class HttpMakerAsyncMicroBase(HttpMakerAsyncBase):
         self,
         path: str = "",
         data: dict | str | None = None,
-        json: dict | None = None,
+        json: JsonLike = None,
         params: dict | None = None,
         headers: dict | None = None,
         use_cache: bool = True,
@@ -116,7 +116,7 @@ class HttpMakerAsyncMicroBase(HttpMakerAsyncBase):
         self,
         path: str = "",
         data: dict | str | None = None,
-        json: dict | None = None,
+        json: JsonLike = None,
         params: dict | None = None,
         headers: dict | None = None,
         use_cache: bool = True,
@@ -137,7 +137,7 @@ class HttpMakerAsyncMicroBase(HttpMakerAsyncBase):
         self,
         path: str = "",
         data: dict | str | None = None,
-        json: dict | None = None,
+        json: JsonLike = None,
         params: dict | None = None,
         headers: dict | None = None,
         use_cache: bool = True,
@@ -158,7 +158,7 @@ class HttpMakerAsyncMicroBase(HttpMakerAsyncBase):
         self,
         path: str = "",
         data: dict | str | None = None,
-        json: dict | None = None,
+        json: JsonLike = None,
         params: dict | None = None,
         headers: dict | None = None,
         use_cache: bool = True,
@@ -179,7 +179,7 @@ class HttpMakerAsyncMicroBase(HttpMakerAsyncBase):
         self,
         path: str = "",
         data: dict | str | None = None,
-        json: dict | None = None,
+        json: JsonLike = None,
         params: dict | None = None,
         headers: dict | None = None,
         use_cache: bool = True,
@@ -200,7 +200,7 @@ class HttpMakerAsyncMicroBase(HttpMakerAsyncBase):
         self,
         path: str = "",
         data: dict | str | None = None,
-        json: dict | None = None,
+        json: JsonLike = None,
         params: dict | None = None,
         headers: dict | None = None,
         use_cache: bool = True,

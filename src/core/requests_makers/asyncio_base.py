@@ -1,15 +1,21 @@
 import asyncio
 from collections.abc import Coroutine
 from typing import Callable, Any
+from dataclasses import dataclass, asdict, is_dataclass
 import logging
+import json
 
 import aiohttp
+from pydantic import BaseModel
 
 from .response import ResponseData, Method
-from .exceptions import UnableToParse, RequestMethodNotFoundException
+from .exceptions import UnableToParse, RequestMethodNotFoundException, UnsupportedObject
 
 
 logger = logging.getLogger(__name__)
+
+
+type JsonLike = dict[str, Any] | str | dataclass | BaseModel | None
 
 
 class HttpMakerAsyncBase:
@@ -91,6 +97,21 @@ class HttpMakerAsyncBase:
             if type(v) is bool:
                 params[k] = "true" if v else "false"
         return params
+
+    @staticmethod
+    def _model_to_json_str(model: JsonLike = None) -> str | None:
+        """Конвертирует словарь, модель датакласса или pydantic в json строку"""
+        if model is None:
+            return model
+        elif isinstance(model, str):
+            return model
+        elif isinstance(model, dict):
+            return json.dumps(model)
+        elif isinstance(model, BaseModel):
+            return model.model_dump_json()
+        elif is_dataclass(model):
+            return json.dumps(asdict(model))
+        raise UnsupportedObject(model)
 
     @staticmethod
     def _extract_method(method: Method, session: aiohttp.ClientSession) -> Callable:
