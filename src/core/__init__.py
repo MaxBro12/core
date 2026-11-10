@@ -1,7 +1,6 @@
 __version__ = '0.1.9a'
 
 from . import debug
-from . import dot_env
 from . import fast_decorators
 from . import fast_depends
 from . import redis_client
@@ -13,7 +12,6 @@ from . import spec_time
 
 __all__ = (
     'debug',
-    'dot_env',
     'fast_decorators',
     'fast_depends',
     'redis_client',
