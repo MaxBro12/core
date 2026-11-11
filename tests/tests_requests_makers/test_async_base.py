@@ -6,6 +6,7 @@ from dataclasses import dataclass, asdict
 import pytest
 from src.core.requests_makers.asyncio_base import HttpMakerAsyncBase
 from src.core.requests_makers.exceptions import RequestMethodNotFoundException, UnsupportedObject
+from src.core.requests_makers.response import ResponseData
 
 
 async def test_init():
@@ -153,7 +154,7 @@ async def test_model_dump_dict():
     assert type(ans) is str
     r = json.dumps(t)
     assert ans == r
-    
+
 
 async def test_model_dataclass():
     a = HttpMakerAsyncBase('')
@@ -165,7 +166,7 @@ async def test_model_dataclass():
         b: str = '123456789qwertyuiopasdfghjklzxcvbnm,.<>/;:\'"[]{}'
         c: float = 1.123456
     t1 = T1()
-    
+
     @dataclass(frozen=True, slots=True)
     class T2:
         a: bool = True
@@ -173,7 +174,7 @@ async def test_model_dataclass():
         b: str = '123456789qwertyuiopasdfghjklzxcvbnm,.<>/;:\'"[]{}'
         c: float = 1.123456
     t2 = T2()
-    
+
     @dataclass(slots=True)
     class T3:
         a: bool = True
@@ -181,7 +182,7 @@ async def test_model_dataclass():
         b: str = '123456789qwertyuiopasdfghjklzxcvbnm,.<>/;:\'"[]{}'
         c: float = 1.123456
     t3 = T3()
-    
+
     @dataclass(frozen=True)
     class T4:
         a: bool = True
@@ -189,7 +190,7 @@ async def test_model_dataclass():
         b: str = '123456789qwertyuiopasdfghjklzxcvbnm,.<>/;:\'"[]{}'
         c: float = 1.123456
     t4 = T4()
-    
+
     t1_a = a._model_to_json_str(t1)
     t2_a = a._model_to_json_str(t2)
     t3_a = a._model_to_json_str(t3)
@@ -204,7 +205,7 @@ async def test_model_dataclass():
     t2_b = T2(**json.loads(t2_a))
     t3_b = T3(**json.loads(t3_a))
     t4_b = T4(**json.loads(t4_a))
-    
+
     assert t1 == t1_b
     assert t2 == t2_b
     assert t3 == t3_b
@@ -241,3 +242,50 @@ async def test_model_incorrect():
 async def test_model_none():
     a = HttpMakerAsyncBase('')
     assert a._model_to_json_str(None) is None
+
+
+async def test_json_to_model_correct():
+    a = HttpMakerAsyncBase('')
+
+    @dataclass
+    class Model:
+        a: bool = True
+        a2: bool = False
+        b: str = '123456789qwertyuiopasdfghjklzxcvbnm,.<>/;:\'"[]{}'
+        c: float = 1.123456
+
+    ans = a._json_to_model(ResponseData('test_url', 200, {}, {
+        'a': False,
+        'a2': True,
+        'b': '123456789qwertyuiopasdfghjklzxcvbnm,.<>/;:\'"[]{}',
+        'c': 1.123456
+    }), {200: Model})
+
+    assert type(ans) is Model
+    assert ans.a is False
+    assert ans.a2 is True
+    assert ans.b == Model().b
+    assert ans.c == Model().c
+
+
+async def test_json_to_model_correct_by_model():
+    a = HttpMakerAsyncBase('')
+
+    class Model(BaseModel):
+        a: bool = True
+        a2: bool = False
+        b: str = '123456789qwertyuiopasdfghjklzxcvbnm,.<>/;:\'"[]{}'
+        c: float = 1.123456
+
+    ans = a._json_to_model(ResponseData('test_url', 200, {}, {
+        'a': False,
+        'a2': True,
+        'b': '123456789qwertyuiopasdfghjklzxcvbnm,.<>/;:\'"[]{}',
+        'c': 1.123456
+    }), {200: Model})
+
+    assert type(ans) is Model
+    assert ans.a is False
+    assert ans.a2 is True
+    assert ans.b == Model().b
+    assert ans.c == Model().c

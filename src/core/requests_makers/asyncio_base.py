@@ -9,13 +9,20 @@ import aiohttp
 from pydantic import BaseModel
 
 from .response import ResponseData, Method
-from .exceptions import UnableToParse, RequestMethodNotFoundException, UnsupportedObject
+from .exceptions import (
+    UnableToParse,
+    RequestMethodNotFoundException,
+    UnsupportedObject,
+    ResponseValidationError, ResponseKeyError
+)
 
 
 logger = logging.getLogger(__name__)
 
 
 type JsonLike = dict[str, Any] | str | dataclass | BaseModel | None
+type ResponseModel = dataclass | BaseModel
+type ResponseModels = dict[int, ResponseModel] | None
 
 
 class HttpMakerAsyncBase:
@@ -97,6 +104,17 @@ class HttpMakerAsyncBase:
             if type(v) is bool:
                 params[k] = "true" if v else "false"
         return params
+
+    @staticmethod
+    def _json_to_model(response: ResponseData, response_models: ResponseModels) -> ResponseModel | None:
+        if response_models:
+            try:
+                return response_models[response.status](**response.json)
+            except ValueError:
+                raise ResponseValidationError(response.status, response_models[response.status])
+            except KeyError:
+                raise ResponseKeyError(response.url, response.status)
+        return None
 
     @staticmethod
     def _model_to_json_str(model: JsonLike = None) -> str | None:

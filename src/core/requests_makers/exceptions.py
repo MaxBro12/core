@@ -32,6 +32,16 @@ class UnsupportedObject(RequestsMakersException):
         super().__init__(f'Cant convert model to json {type(model)}')
 
 
+class ResponseValidationError(RequestsMakersException):
+    def __init__(self, status, model) -> None:
+        super().__init__(f'{status} -> Cant convert json to model {model}')
+
+
+class ResponseKeyError(RequestsMakersException):
+    def __init__(self, url, status) -> None:
+        super().__init__(f'{url} not provided model for code {status}')
+
+
 class ResponseStatusError(RequestsMakersException):
     def __init__(self, status: int, headers: dict, json: dict) -> None:
         super().__init__(f'Response bad status {status}: {headers} > {json}')
