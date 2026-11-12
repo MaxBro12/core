@@ -149,11 +149,9 @@ async def test_multi_call():
 async def test_model_dump_dict():
     a = HttpMakerAsyncBase('')
     t = {'a': 10, 1: 100,  1.2: '100'}
-    ans = a._model_to_json_str(t)
+    ans = a._model_to_json(t)
 
-    assert type(ans) is str
-    r = json.dumps(t)
-    assert ans == r
+    assert {'a': 10, 1: 100,  1.2: '100'} == ans
 
 
 async def test_model_dataclass():
@@ -191,20 +189,15 @@ async def test_model_dataclass():
         c: float = 1.123456
     t4 = T4()
 
-    t1_a = a._model_to_json_str(t1)
-    t2_a = a._model_to_json_str(t2)
-    t3_a = a._model_to_json_str(t3)
-    t4_a = a._model_to_json_str(t4)
+    t1_a = a._model_to_json(t1)
+    t2_a = a._model_to_json(t2)
+    t3_a = a._model_to_json(t3)
+    t4_a = a._model_to_json(t4)
 
-    assert type(t1_a) is str
-    assert type(t2_a) is str
-    assert type(t3_a) is str
-    assert type(t4_a) is str
-
-    t1_b = T1(**json.loads(t1_a))
-    t2_b = T2(**json.loads(t2_a))
-    t3_b = T3(**json.loads(t3_a))
-    t4_b = T4(**json.loads(t4_a))
+    t1_b = T1(**t1_a)
+    t2_b = T2(**t2_a)
+    t3_b = T3(**t3_a)
+    t4_b = T4(**t4_a)
 
     assert t1 == t1_b
     assert t2 == t2_b
@@ -220,9 +213,8 @@ async def test_model_pydantic():
         b: str = '123456789qwertyuiopasdfghjklzxcvbnm,.<>/;:\'"[]{}'
         c: float = 1.123456
     t = TestModel()
-    t_a = a._model_to_json_str(t)
-    assert type(t_a) is str
-    t_b = TestModel(**json.loads(t_a))
+    t_a = a._model_to_json(t)
+    t_b = TestModel(**t_a)
     assert t == t_b
 
 
@@ -236,12 +228,12 @@ async def test_model_incorrect():
         c: float = 1.123456
 
     with pytest.raises(UnsupportedObject):
-        a._model_to_json_str(Model())
+        a._model_to_json(Model())
 
 
 async def test_model_none():
     a = HttpMakerAsyncBase('')
-    assert a._model_to_json_str(None) is None
+    assert a._model_to_json(None) is None
 
 
 async def test_json_to_model_correct():

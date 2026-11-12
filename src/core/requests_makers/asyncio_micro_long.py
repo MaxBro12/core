@@ -90,7 +90,7 @@ class HttpMakerMicroAsyncLong(HttpMakerAsyncMicroBase, HttpMakerSessionControl):
 
         headers = self._full_haeders(headers)
         params = self._full_params(params)
-        json = self._model_to_json_str(json)
+        json = self._model_to_json(json)
 
         try:
             async with http_method(

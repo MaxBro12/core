@@ -3,7 +3,6 @@ from collections.abc import Coroutine
 from typing import Callable, Any
 from dataclasses import dataclass, asdict, is_dataclass
 import logging
-import json
 
 import aiohttp
 from pydantic import BaseModel
@@ -20,7 +19,7 @@ from .exceptions import (
 logger = logging.getLogger(__name__)
 
 
-type JsonLike = dict[str, Any] | str | type | dataclass | BaseModel | None
+type JsonLike = dict[str, Any] | type | dataclass | BaseModel | None
 type ResponseModel = type | dataclass | BaseModel
 type ResponseModels = dict[int, ResponseModel] | None
 #type ResponseModelsExt = dict[int | str, ResponseModel] | None
@@ -118,18 +117,14 @@ class HttpMakerAsyncBase:
         return None
 
     @staticmethod
-    def _model_to_json_str(model: JsonLike = None) -> str | None:
+    def _model_to_json(model: JsonLike = None) -> dict | None:
         """Конвертирует словарь, модель датакласса или pydantic в json строку"""
-        if model is None:
+        if model is None or isinstance(model, dict):
             return model
-        elif isinstance(model, str):
-            return model
-        elif isinstance(model, dict):
-            return json.dumps(model)
         elif isinstance(model, BaseModel):
-            return model.model_dump_json()
+            return model.model_dump()
         elif is_dataclass(model):
-            return json.dumps(asdict(model))
+            return asdict(model)
         raise UnsupportedObject(model)
 
     @staticmethod

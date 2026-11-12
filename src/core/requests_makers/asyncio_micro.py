@@ -72,7 +72,7 @@ class HttpMakerMicroAsync(HttpMakerAsyncMicroBase):
         """
         headers = self._full_haeders(headers)
         params = self._full_params(params)
-        json = self._model_to_json_str(json)
+        json = self._model_to_json(json)
 
         async with aiohttp.ClientSession(
             timeout=aiohttp.ClientTimeout(total=request_timeout or self._timeout)

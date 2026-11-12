@@ -87,8 +87,8 @@ class HttpMakerAsyncLong(HttpMakerAsyncBaseMiddle, HttpMakerSessionControl):
 
         headers = self._full_haeders(headers)
         params = self._full_params(params)
-        json = self._model_to_json_str(json)
-        
+        json = self._model_to_json(json)
+
         for _ in range(self._tries_to_reconnect):
             try:
                 async with http_method(
