@@ -20,9 +20,10 @@ from .exceptions import (
 logger = logging.getLogger(__name__)
 
 
-type JsonLike = dict[str, Any] | str | dataclass | BaseModel | None
-type ResponseModel = dataclass | BaseModel
+type JsonLike = dict[str, Any] | str | type | dataclass | BaseModel | None
+type ResponseModel = type | dataclass | BaseModel
 type ResponseModels = dict[int, ResponseModel] | None
+#type ResponseModelsExt = dict[int | str, ResponseModel] | None
 
 
 class HttpMakerAsyncBase:
@@ -110,7 +111,7 @@ class HttpMakerAsyncBase:
         if response_models:
             try:
                 return response_models[response.status](**response.json)
-            except ValueError:
+            except (ValueError, TypeError):
                 raise ResponseValidationError(response.status, response_models[response.status])
             except KeyError:
                 raise ResponseKeyError(response.url, response.status)

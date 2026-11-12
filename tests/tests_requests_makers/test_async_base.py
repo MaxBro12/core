@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from dataclasses import dataclass, asdict
 import pytest
 from src.core.requests_makers.asyncio_base import HttpMakerAsyncBase
-from src.core.requests_makers.exceptions import RequestMethodNotFoundException, UnsupportedObject
+from src.core.requests_makers.exceptions import RequestMethodNotFoundException, UnsupportedObject, ResponseValidationError, ResponseKeyError
 from src.core.requests_makers.response import ResponseData
 
 
@@ -289,3 +289,103 @@ async def test_json_to_model_correct_by_model():
     assert ans.a2 is True
     assert ans.b == Model().b
     assert ans.c == Model().c
+
+
+async def test_json_to_model_wrong_field():
+    a = HttpMakerAsyncBase('')
+
+    @dataclass
+    class Model:
+        a: int
+        a2: bool = False
+        c: float = 1.123456
+
+    with pytest.raises(ResponseValidationError):
+        a._json_to_model(ResponseData('test_url', 200, {}, {
+            'a2': True,
+            'c': 1.123456
+        }), {200: Model})
+
+
+async def test_json_to_model_wrong_field_by_model():
+    a = HttpMakerAsyncBase('')
+
+    class Model(BaseModel):
+        a: int
+        a2: bool = False
+        c: float = 1.123456
+
+    with pytest.raises(ResponseValidationError):
+        a._json_to_model(ResponseData('test_url', 200, {}, {
+            'a2': True,
+            'c': 1.123456
+        }), {200: Model})
+
+
+async def test_json_to_model_wrong_field_by_class():
+    a = HttpMakerAsyncBase('')
+
+    class Model:
+        a: int
+        a2: bool = False
+        c: float = 1.123456
+
+    with pytest.raises(ResponseValidationError):
+        a._json_to_model(ResponseData('test_url', 200, {}, {
+            'a2': True,
+            'c': 1.123456
+        }), {200: Model})
+
+
+async def test_json_to_model_no_model():
+    a = HttpMakerAsyncBase('')
+
+    class Model(BaseModel):
+        a: bool = True
+        a2: bool = False
+        b: str = '123456789qwertyuiopasdfghjklzxcvbnm,.<>/;:\'"[]{}'
+        c: float = 1.123456
+
+    with pytest.raises(ResponseKeyError):
+        a._json_to_model(ResponseData('test_url', 400, {}, {
+            'a': False,
+            'a2': True,
+            'b2': '123456789qwertyuiopasdfghjklzxcvbnm,.<>/;:\'"[]{}',
+            'c': 1.123456
+        }), {200: Model})
+
+
+async def test_json_to_model_no_model_by_pidantic():
+    a = HttpMakerAsyncBase('')
+
+    class Model(BaseModel):
+        a: bool = True
+        a2: bool = False
+        b: str = '123456789qwertyuiopasdfghjklzxcvbnm,.<>/;:\'"[]{}'
+        c: float = 1.123456
+
+    with pytest.raises(ResponseKeyError):
+        a._json_to_model(ResponseData('test_url', 400, {}, {
+            'a': False,
+            'a2': True,
+            'b2': '123456789qwertyuiopasdfghjklzxcvbnm,.<>/;:\'"[]{}',
+            'c': 1.123456
+        }), {200: Model})
+
+
+async def test_json_to_model_no_model_by_class():
+    a = HttpMakerAsyncBase('')
+
+    class Model:
+        a: bool = True
+        a2: bool = False
+        b: str = '123456789qwertyuiopasdfghjklzxcvbnm,.<>/;:\'"[]{}'
+        c: float = 1.123456
+
+    with pytest.raises(ResponseKeyError):
+        a._json_to_model(ResponseData('test_url', 400, {}, {
+            'a': False,
+            'a2': True,
+            'b2': '123456789qwertyuiopasdfghjklzxcvbnm,.<>/;:\'"[]{}',
+            'c': 1.123456
+        }), {200: Model})

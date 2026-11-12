@@ -1,4 +1,4 @@
-__version__ = '0.1.9a'
+__version__ = '0.1.9b'
 
 from . import debug
 from . import fast_decorators
